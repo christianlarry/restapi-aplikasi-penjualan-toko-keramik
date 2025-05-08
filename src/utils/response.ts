@@ -1,7 +1,7 @@
 import { Pagination } from "@/interfaces/pagination.interface"
 import {Response} from "express"
 
-const responseOk = (res:Response, status:number, data:any, page:Pagination) => {
+const responseOk = (res:Response, status:number, data:any, page?:Pagination) => {
   if (!page) {
       return res.status(status).json({
           data
