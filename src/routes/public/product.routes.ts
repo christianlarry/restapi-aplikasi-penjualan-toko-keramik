@@ -1,11 +1,8 @@
 import express from "express"
+import productController from "@/controllers/product.controller"
 
 const router = express.Router()
 
-router.get("/",(req,res)=>{
-  res.json({
-    "message": "TEST this is Products routes!"
-  }).end()
-})
+router.get("/",productController.getMany)
 
 export default router

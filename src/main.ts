@@ -3,10 +3,15 @@ dotenv.config()
 
 import { web } from "@application/web"
 import { logger } from "@application/logging"
+import { connectToMongoDB } from "./application/database"
 
-// ENV IMPORT
-const PORT = process.env.PORT
+// Connect to DB First!!!
+connectToMongoDB().then(()=>{
 
-web.listen(PORT, ()=>{
-  logger.info(`Server up and running at http://localhost:${PORT}`)
+  // ENV IMPORT
+  const PORT = process.env.PORT
+
+  web.listen(PORT, ()=>{
+    logger.info(`Server up and running at http://localhost:${PORT}`)
+  })
 })
