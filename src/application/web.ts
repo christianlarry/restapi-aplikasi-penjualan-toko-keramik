@@ -2,8 +2,9 @@ import express,{Express} from "express"
 import cors from "cors"
 
 // IMPORT ROUTES
-import publicRoutes from "@routes/public-routes"
+import publicRoutes from "@routes/public.routes"
 import privateRoutes from "@routes/private.routes"
+import { errorMiddleware } from "@/middlewares/error.middleware"
 
 export const web:Express = express()
 
@@ -19,4 +20,4 @@ web.use("/api",publicRoutes)
 web.use("/api",privateRoutes) 
 
 // Bottom Middleware
-// web.use(errorMiddleware)
+web.use(errorMiddleware)
