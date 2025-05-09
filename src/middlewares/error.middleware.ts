@@ -1,4 +1,5 @@
 import { ResponseError } from "@/errors/response.error"
+import { responseErr } from "@/utils/response"
 import { NextFunction, Request, Response } from "express"
 
 export const errorMiddleware = (err:Error, req:Request, res:Response, next:NextFunction) => {
@@ -8,12 +9,8 @@ export const errorMiddleware = (err:Error, req:Request, res:Response, next:NextF
   }
 
   if (err instanceof ResponseError) {
-    res.status(err.status).json({
-      errors: err.message
-    }).end()
+    responseErr(res,err.status,err.message)
   } else {
-    res.status(500).json({
-      errors: err.message
-    }).end()
+    responseErr(res,500,err.message)
   }
 }

@@ -1,6 +1,7 @@
 import { Pagination } from "@/interfaces/pagination.interface"
 import { Product, ProductFilters } from "@/interfaces/products.interface"
 import {db} from "@application/database"
+import { ObjectId } from "mongodb"
 
 // VARIABEL
 const strCollectionProduct:string = "products"
@@ -60,8 +61,12 @@ const getPaginated = async (page:number,size:number,searchQuery:string|undefined
   }
 }
 
-const get = (id:string)=>{
+const get = async (id:string)=>{
+  const product:Product[] = await getProductCollection().find({
+    _id: new ObjectId(id)
+  }).toArray()
 
+  return product[0]
 }
 
 const create = ()=>{

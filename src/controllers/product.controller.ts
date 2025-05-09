@@ -7,6 +7,8 @@ const fallbackPaginationPage = 1
 import productService from "@/services/product.service"
 import { responseOk } from "@/utils/response"
 import { ProductFilters } from "@/interfaces/products.interface"
+import { ResponseError } from "@/errors/response.error"
+import { ObjectId } from "mongodb"
 
 const getMany = async (req:Request,res:Response,next:NextFunction)=>{
   try {
@@ -52,6 +54,25 @@ const getMany = async (req:Request,res:Response,next:NextFunction)=>{
   }
 }
 
+const get = async (req:Request,res:Response,next:NextFunction)=>{
+  try {
+    
+    const productId = req.params.id
+
+    if(!ObjectId.isValid(productId)) throw new ResponseError(400,"Invalid product id!")
+    
+    const product = await productService.get(productId)
+    
+    if(!product) throw new ResponseError(404,"Product not found!")
+
+    responseOk(res,200,product)
+
+  } catch (err) {
+    next(err)
+  }
+}
+
 export default {
-  getMany
+  getMany,
+  get
 }
