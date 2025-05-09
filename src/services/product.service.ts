@@ -1,7 +1,6 @@
 import { Pagination } from "@/interfaces/pagination.interface"
-import { Product } from "@/interfaces/products.interface"
+import { Product, ProductFilters } from "@/interfaces/products.interface"
 import {db} from "@application/database"
-import { Collection } from "mongodb"
 
 // VARIABEL
 const strCollectionProduct:string = "products"
@@ -15,8 +14,24 @@ const getMany = async ()=>{
   return product
 }
 
-const getPaginated = async (page:number,size:number)=>{
-  const total = await getProductCollection().countDocuments()
+const getPaginated = async (page:number,size:number,filters:ProductFilters)=>{
+
+  const product:Product[] = await getProductCollection()
+    .find({
+      ...(filters.design && { design: filters.design }),
+      ...(filters.texture && { texture: filters.texture }),
+      ...(filters.color && { color: filters.color }),
+      ...(filters.finishing && { finishing: filters.finishing }),
+      ...(filters.size && { 
+        "size.width": filters.size.width,
+        "size.height": filters.size.height 
+      })
+    })
+    .skip((page-1)*size)
+    .limit(size)
+    .toArray()
+
+  const total = product.length
   const totalPages = Math.ceil(total/size) 
 
   const pagination:Pagination = {
@@ -25,12 +40,6 @@ const getPaginated = async (page:number,size:number)=>{
     totalPages,
     current: page
   }
-
-  const product:Product[] = await getProductCollection()
-    .find()
-    .skip((page-1)*size)
-    .limit(size)
-    .toArray()
 
   return {
     product,

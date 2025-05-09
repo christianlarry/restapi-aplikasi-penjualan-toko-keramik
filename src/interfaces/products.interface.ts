@@ -16,3 +16,14 @@ export interface Product{
   createdAt: string,
   updatedAt: string
 }
+
+export interface ProductFilters{
+  design?:string,
+  texture?:string,
+  finishing?:string,
+  color?:string,
+  size?:{
+    height:number,
+    width:number
+  }
+}
