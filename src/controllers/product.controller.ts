@@ -10,7 +10,7 @@ import { ProductFilters } from "@/interfaces/products.interface"
 
 const getMany = async (req:Request,res:Response,next:NextFunction)=>{
   try {
-    // SET FILTERS
+    // FILTERS
     const filters:ProductFilters = {
       texture: req.query.texture?.toString(),
       finishing: req.query.finishing?.toString(),
@@ -22,14 +22,18 @@ const getMany = async (req:Request,res:Response,next:NextFunction)=>{
       }:undefined,
     }
 
+    // SEARCH QUERY
+    const searchQuery:string|undefined = req.query.search?.toString()
+
     // IF NEED PAGINATION
     const {pagination_size,pagination_page} = req.query
 
     if(pagination_page || pagination_size){
 
       const {product,pagination} = await productService.getPaginated(
-        Number(pagination_page)||fallbackPaginationPage,
-        Number(pagination_size)||fallbackPaginationSize,
+        parseInt(pagination_page as string)||fallbackPaginationPage,
+        parseInt(pagination_size as string)||fallbackPaginationSize,
+        searchQuery,
         filters
       )
 
@@ -37,8 +41,9 @@ const getMany = async (req:Request,res:Response,next:NextFunction)=>{
 
       return
     }
+    // END IF NEED PAGINATION ---
 
-    const products = await productService.getMany()
+    const products = await productService.getMany(searchQuery,filters)
     
     responseOk(res,200,products)
 
