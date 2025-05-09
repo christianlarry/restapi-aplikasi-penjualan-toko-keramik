@@ -9,6 +9,7 @@ import { responseOk } from "@/utils/response"
 import { ProductFilters } from "@/interfaces/products.interface"
 import { ResponseError } from "@/errors/response.error"
 import { ObjectId } from "mongodb"
+import { messages } from "@/constants/messages"
 
 const getMany = async (req:Request,res:Response,next:NextFunction)=>{
   try {
@@ -59,11 +60,11 @@ const get = async (req:Request,res:Response,next:NextFunction)=>{
     
     const productId = req.params.id
 
-    if(!ObjectId.isValid(productId)) throw new ResponseError(400,"Invalid product id!")
+    if(!ObjectId.isValid(productId)) throw new ResponseError(400,messages.product.invalidProductId)
     
     const product = await productService.get(productId)
     
-    if(!product) throw new ResponseError(404,"Product not found!")
+    if(!product) throw new ResponseError(404,messages.product.notFound)
 
     responseOk(res,200,product)
 
@@ -72,7 +73,29 @@ const get = async (req:Request,res:Response,next:NextFunction)=>{
   }
 }
 
+const add = async (req:Request,res:Response,next:NextFunction)=>{
+  try {
+
+    const {} = req.body
+
+
+  } catch (err) {
+    next(err)
+  }
+}
+
+const update = async (req:Request,res:Response,next:NextFunction)=>{
+
+}
+
+const remove = async (req:Request,res:Response,next:NextFunction)=>{
+
+}
+
 export default {
   getMany,
-  get
+  get,
+  add,
+  update,
+  remove
 }
