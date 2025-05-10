@@ -1,6 +1,6 @@
 export const messages = {
   product:{
-    invalidProductId: "Invalid product id!",
+    invalidId: "Invalid product id!",
     notFound: "Product not found!"
   }
 }

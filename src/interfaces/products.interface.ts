@@ -29,3 +29,16 @@ export interface ProductFilters{
     width:number
   }
 }
+
+export interface ProductRequestBody{
+  name: string,
+  type: string,
+  design: string,
+  size_width: number,
+  size_height: number,
+  color: string,
+  finishing: string,
+  texture: string,
+  brand: string,
+  price: number
+}

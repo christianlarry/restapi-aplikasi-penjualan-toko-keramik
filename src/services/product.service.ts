@@ -1,5 +1,7 @@
 import { Pagination } from "@/interfaces/pagination.interface"
-import { Product, ProductFilters } from "@/interfaces/products.interface"
+import { Product, ProductFilters, ProductRequestBody } from "@/interfaces/products.interface"
+import { postProductValidation } from "@/validations/product.validation"
+import { validate } from "@/validations/validation"
 import {db} from "@application/database"
 import { ObjectId } from "mongodb"
 
@@ -69,8 +71,10 @@ const get = async (id:string)=>{
   return product[0]
 }
 
-const create = ()=>{
-
+const create = (body:ProductRequestBody)=>{
+  const product = validate<ProductRequestBody>(postProductValidation,body)
+  
+  console.log(product)
 }
 
 const update = (id:string)=>{
