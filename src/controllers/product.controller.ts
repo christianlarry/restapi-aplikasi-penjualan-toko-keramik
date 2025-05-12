@@ -90,7 +90,11 @@ const add = async (req: Request, res: Response, next: NextFunction) => {
       price
     }:ProductRequestBody = req.body
 
+    const result = await productService.create({
+      name,brand,color,design,finishing,price,size_height,size_width,texture,type
+    })
 
+    responseOk(res,201,result)
 
   } catch (err) {
     next(err);

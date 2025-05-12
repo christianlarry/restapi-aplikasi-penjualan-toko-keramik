@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb"
 
 export interface Product{
-  _id: ObjectId,
+  _id?: ObjectId,
   name: string,
   type: string,
   design: string,
@@ -14,9 +14,9 @@ export interface Product{
   texture: string,
   brand: string,
   price: number,
-  image: string,
-  createdAt: string,
-  updatedAt: string
+  image?: string,
+  createdAt: Date,
+  updatedAt: Date
 }
 
 export interface ProductFilters{

@@ -1,13 +1,8 @@
 import express from "express"
+import privateProductRoutes from "@routes/private/product.routes"
 
 const router = express.Router()
 
-// THIS IS ROUTES LINE
-// CONTOH ---
-router.get("/test",(req,res)=>{
-  res.json({
-    message: "TEST Routes"
-  }).end()
-})
+router.use("/product",privateProductRoutes)
 
 export default router

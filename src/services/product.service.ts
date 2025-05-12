@@ -1,3 +1,4 @@
+import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
 import { Product, ProductFilters, ProductRequestBody } from "@/interfaces/products.interface"
 import { postProductValidation } from "@/validations/product.validation"
@@ -32,6 +33,11 @@ const getProductFilters = (filters:ProductFilters,searchQuery?:string)=>{
     })
     }
 }
+const checkProductName = async (productName:string):Promise<boolean>=>{
+    const existing = await getProductCollection().findOne({name: productName})
+    
+    return !!existing
+  }
 
 const getMany = async (searchQuery:string|undefined,filters:ProductFilters)=>{
   const product:Product[] = await getProductCollection().find(getProductFilters(filters,searchQuery)).toArray()
@@ -71,10 +77,34 @@ const get = async (id:string)=>{
   return product[0]
 }
 
-const create = (body:ProductRequestBody)=>{
+const create = async (body:ProductRequestBody)=>{
   const product = validate<ProductRequestBody>(postProductValidation,body)
-  
-  console.log(product)
+
+  // CEK APAKAH NAMA SUDAH DIGUNAKAN
+  const isNameTaken:boolean = await checkProductName(product.name)
+  if(isNameTaken) throw new ResponseError(400,"Nama produk sudah digunakan")
+
+  const result = await getProductCollection().insertOne({
+    name: product.name,
+    type: product.type,
+    design: product.design,
+    color: product.color,
+    finishing: product.finishing,
+    texture: product.texture,
+    brand: product.brand,
+    price: product.price,
+    size:{
+      height: product.size_height,
+      width: product.size_width
+    },
+    createdAt: new Date(),
+    updatedAt: new Date()
+  })
+
+  return {
+    _id: result.insertedId,
+    ...product
+  }
 }
 
 const update = (id:string)=>{
