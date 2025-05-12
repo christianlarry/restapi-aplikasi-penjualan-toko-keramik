@@ -1,3 +1,4 @@
+import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
 import { Product, ProductFilters, ProductRequestBody } from "@/interfaces/products.interface"
@@ -37,7 +38,7 @@ const checkProductName = async (productName:string):Promise<boolean>=>{
     const existing = await getProductCollection().findOne({name: productName})
     
     return !!existing
-  }
+}
 
 const getMany = async (searchQuery:string|undefined,filters:ProductFilters)=>{
   const product:Product[] = await getProductCollection().find(getProductFilters(filters,searchQuery)).toArray()
@@ -82,7 +83,7 @@ const create = async (body:ProductRequestBody)=>{
 
   // CEK APAKAH NAMA SUDAH DIGUNAKAN
   const isNameTaken:boolean = await checkProductName(product.name)
-  if(isNameTaken) throw new ResponseError(400,"Nama produk sudah digunakan")
+  if(isNameTaken) throw new ResponseError(400,messages.product.nameTaken)
 
   const result = await getProductCollection().insertOne({
     name: product.name,
