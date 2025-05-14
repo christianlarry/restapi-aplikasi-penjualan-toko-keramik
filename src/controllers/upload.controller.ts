@@ -4,7 +4,7 @@ import { responseOk } from "@/utils/response";
 import { ResponseError } from "@/errors/response.error";
 import { validationsStrings } from "@/constants/validations.strings";
 
-const uploadProductImage = (req:Request,res:Response,next:NextFunction)=>{
+const uploadProductImage = async (req:Request,res:Response,next:NextFunction)=>{
   try {
     const {productId} = req.body
 
@@ -14,7 +14,7 @@ const uploadProductImage = (req:Request,res:Response,next:NextFunction)=>{
     // Cek apakah ada file yang dikirim
     if (!req.file) throw new ResponseError(400,validationsStrings.product.imageFileRequired)
 
-    const updatedProduct = uploadService.uploadProductImage(productId,req.file.path)
+    const updatedProduct = await uploadService.uploadProductImage(productId,req.file.path)
 
     responseOk(res,201,updatedProduct)
 

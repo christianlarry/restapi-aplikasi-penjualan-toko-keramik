@@ -21,24 +21,25 @@ const uploadProductImage = async (
 
   if(!product) throw new ResponseError(404,messages.product.notFound)
 
-  // Update field image
+  // Update field image and meta updatedAt
   const result = await getProductCollection().updateOne({
     _id: productObjectId
   },{
     $set:{
-      image: imagePath
+      image: imagePath,
+      updatedAt: new Date()
     }
   })
 
   
   if (result.modifiedCount === 0) {
-    throw new ResponseError(500, 'Failed to update product image!');
+    throw new ResponseError(500, messages.product.errorProductNotUpdated);
   }
 
   // Kembalikan data produk baru
   const updatedProduct = await getProductCollection().findOne({ _id: productObjectId });
   if (!updatedProduct) {
-    throw new ResponseError(500, 'Unexpected error: product missing after update');
+    throw new ResponseError(500, messages.product.errorProductNotFoundAfterUpdate);
   }
 
   return updatedProduct;

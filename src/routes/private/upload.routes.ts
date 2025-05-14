@@ -5,7 +5,7 @@ import uploadProductImage from "@/middlewares/uploadProductImage.middleware"
 const router = express.Router()
 
 router.post(
-  "/upload/product-image",
+  "/product-image",
   uploadProductImage.single("image"),
   uploadController.uploadProductImage)
 
