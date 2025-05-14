@@ -3,6 +3,7 @@ import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
 import { Product, ProductFilters, PostProduct } from "@/interfaces/products.interface"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
+import { deleteFile } from "@/utils/deleteFile"
 import { postProductValidation, putProductValidation } from "@/validations/product.validation"
 import { validate } from "@/validations/validation"
 import {db} from "@application/database"
@@ -152,8 +153,18 @@ const update = async (id:string,body:PostProduct)=>{
   return result
 }
 
-const remove = (id:string)=>{
+const remove = async (id:string)=>{
+  checkValidObjectId(id,messages.product.invalidId)
 
+  const result = await getProductCollection().findOneAndDelete(
+    {_id: new ObjectId(id)}
+  )
+  
+  if(!result) throw new ResponseError(404,messages.product.notFound)
+
+  if(result.image) deleteFile(result.image)
+
+  return result
 }
 
 export default {

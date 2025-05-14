@@ -86,8 +86,6 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productId:string = req.params.id
 
-    if(!productId) throw new ResponseError(404,validationsStrings.product.idRequired)
-
     const body:PutProduct = req.body
 
     const result = await productService.update(productId,body)
@@ -99,7 +97,18 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const remove = async (req: Request, res: Response, next: NextFunction) => {};
+const remove = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const productId:string = req.params.id
+
+    const result = await productService.remove(productId)
+
+    responseOk(res,200,result)
+
+  } catch (err) {
+    next(err)
+  }
+};
 
 export default {
   getMany,
