@@ -4,15 +4,18 @@ import { Product } from "@/interfaces/products.interface"
 import { ResponseError } from "@/errors/response.error"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { messages } from "@/constants/messages.strings"
+import { deleteFile } from "@/utils/deleteFile"
+import path from "path"
+import fs from "fs"
 
 const uploadProductImage = async (
   productId:string,
-  imagePath:string
+  file:Express.Multer.File
 )=>{
-  const productObjectId = new ObjectId(productId)
-
   // Cek apakah valid Project Id
   checkValidObjectId(productId,messages.product.invalidId)
+
+  const productObjectId = new ObjectId(productId)
 
   // Cek apakah product ada atau tidak!
   const product:Product|null = await getProductCollection().findOne({
@@ -21,13 +24,27 @@ const uploadProductImage = async (
 
   if(!product) throw new ResponseError(404,messages.product.notFound)
 
+  // Hapus image sebelumnnya jika ada
+  if(product.image) deleteFile(product.image)
+
+  // Ganti nama file
+  const dateNow = new Date()
+
+  const oldPath = file.path
+  const newFileName = `${product.name.split(" ").join("-")}-${dateNow.getTime()}${path.extname(file.filename)}`.toLowerCase()
+  const newPath = path.join(file.destination,newFileName)
+
+  fs.rename(oldPath,newPath,(err)=>{
+    if(err) throw new ResponseError(500, messages.product.errorFailedRenameUploadedImage)
+  })
+
   // Update field image and meta updatedAt
   const result = await getProductCollection().updateOne({
     _id: productObjectId
   },{
     $set:{
-      image: imagePath,
-      updatedAt: new Date()
+      image: newPath,
+      updatedAt: dateNow
     }
   })
 
