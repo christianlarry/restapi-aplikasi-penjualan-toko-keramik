@@ -6,7 +6,9 @@ const fallbackPaginationPage = 1;
 
 import productService from "@/services/product.service";
 import { responseOk } from "@/utils/response";
-import { ProductFilters, PostProduct } from "@/interfaces/products.interface";
+import { ProductFilters, PostProduct, PutProduct } from "@/interfaces/products.interface";
+import { ResponseError } from "@/errors/response.error";
+import { validationsStrings } from "@/constants/validations.strings";
 
 const getMany = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -69,22 +71,9 @@ const add = async (req: Request, res: Response, next: NextFunction) => {
   try {
 
     // GET ALL REQUEST BODY 
-    const {
-      name,
-      type,
-      design,
-      size_width,
-      size_height,
-      color,
-      finishing,
-      texture,
-      brand,
-      price
-    }:PostProduct = req.body
+    const body:PostProduct = req.body
 
-    const result = await productService.create({
-      name,brand,color,design,finishing,price,size_height,size_width,texture,type
-    })
+    const result = await productService.create(body)
 
     responseOk(res,201,result)
 
@@ -95,7 +84,16 @@ const add = async (req: Request, res: Response, next: NextFunction) => {
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    
+    const productId:string = req.params.id
+
+    if(!productId) throw new ResponseError(404,validationsStrings.product.idRequired)
+
+    const body:PutProduct = req.body
+
+    const result = await productService.update(productId,body)
+
+    responseOk(res,200,result)
+
   } catch (err) {
     next(err)
   }

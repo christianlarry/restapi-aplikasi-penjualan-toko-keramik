@@ -13,3 +13,5 @@ export const postProductValidation = z.object({
   brand: z.string().min(1, validationsStrings.product.brandRequired),
   price: z.number().nonnegative(validationsStrings.product.priceNonNegative)
 })
+
+export const putProductValidation = postProductValidation

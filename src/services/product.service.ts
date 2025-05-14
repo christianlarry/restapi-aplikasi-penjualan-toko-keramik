@@ -3,7 +3,7 @@ import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
 import { Product, ProductFilters, PostProduct } from "@/interfaces/products.interface"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
-import { postProductValidation } from "@/validations/product.validation"
+import { postProductValidation, putProductValidation } from "@/validations/product.validation"
 import { validate } from "@/validations/validation"
 import {db} from "@application/database"
 import { ObjectId } from "mongodb"
@@ -117,8 +117,39 @@ const create = async (body:PostProduct)=>{
   }
 }
 
-const update = (id:string,body:PostProduct)=>{
-  // CODE HERE...
+const update = async (id:string,body:PostProduct)=>{
+  const product:PostProduct = validate(putProductValidation,body)
+
+  // Cek apakah id valid
+  checkValidObjectId(id,messages.product.invalidId)
+
+  const result = await getProductCollection().findOneAndUpdate(
+    { _id: new ObjectId(id) },
+    {
+      $set:{
+        name: product.name,
+        type: product.type,
+        design: product.design,
+        color: product.color,
+        finishing: product.finishing,
+        texture: product.texture,
+        brand: product.brand,
+        price: product.price,
+        size:{
+          height: product.size_height,
+          width: product.size_width
+        },
+        updatedAt: new Date()
+      }
+    },
+    {
+      returnDocument: "after"
+    }
+  )
+
+  if(!result) throw new ResponseError(404, messages.product.notFound)
+
+  return result
 }
 
 const remove = (id:string)=>{
