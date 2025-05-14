@@ -6,10 +6,7 @@ const fallbackPaginationPage = 1;
 
 import productService from "@/services/product.service";
 import { responseOk } from "@/utils/response";
-import { ProductFilters, ProductRequestBody } from "@/interfaces/products.interface";
-import { ResponseError } from "@/errors/response.error";
-import { ObjectId } from "mongodb";
-import { messages } from "@/constants/messages.strings";
+import { ProductFilters, PostProduct } from "@/interfaces/products.interface";
 
 const getMany = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -60,12 +57,7 @@ const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productId = req.params.id;
 
-    if (!ObjectId.isValid(productId))
-      throw new ResponseError(400, messages.product.invalidId);
-
-    const product = await productService.get(productId);
-
-    if (!product) throw new ResponseError(404, messages.product.notFound);
+    const product = await productService.get(productId)
 
     responseOk(res, 200, product);
   } catch (err) {
@@ -88,7 +80,7 @@ const add = async (req: Request, res: Response, next: NextFunction) => {
       texture,
       brand,
       price
-    }:ProductRequestBody = req.body
+    }:PostProduct = req.body
 
     const result = await productService.create({
       name,brand,color,design,finishing,price,size_height,size_width,texture,type
@@ -101,7 +93,13 @@ const add = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const update = async (req: Request, res: Response, next: NextFunction) => {};
+const update = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    
+  } catch (err) {
+    next(err)
+  }
+};
 
 const remove = async (req: Request, res: Response, next: NextFunction) => {};
 

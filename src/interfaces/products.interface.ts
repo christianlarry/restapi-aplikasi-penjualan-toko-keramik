@@ -14,7 +14,7 @@ export interface Product{
   texture: string,
   brand: string,
   price: number,
-  image?: string,
+  image?: string | null,
   createdAt: Date,
   updatedAt: Date
 }
@@ -30,7 +30,7 @@ export interface ProductFilters{
   }
 }
 
-export interface ProductRequestBody{
+export interface PostProduct{
   name: string,
   type: string,
   design: string,
@@ -42,3 +42,5 @@ export interface ProductRequestBody{
   brand: string,
   price: number
 }
+
+export interface PutProduct extends PostProduct{}

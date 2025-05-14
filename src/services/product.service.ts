@@ -1,7 +1,8 @@
 import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
-import { Product, ProductFilters, ProductRequestBody } from "@/interfaces/products.interface"
+import { Product, ProductFilters, PostProduct } from "@/interfaces/products.interface"
+import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { postProductValidation } from "@/validations/product.validation"
 import { validate } from "@/validations/validation"
 import {db} from "@application/database"
@@ -9,7 +10,7 @@ import { ObjectId } from "mongodb"
 
 // VARIABEL
 const strCollectionProduct:string = "products"
-const getProductCollection = ()=>{
+export const getProductCollection = ()=>{
   return db.collection<Product>(strCollectionProduct)
 }
 const getProductFilters = (filters:ProductFilters,searchQuery?:string)=>{
@@ -71,15 +72,22 @@ const getPaginated = async (page:number,size:number,searchQuery:string|undefined
 }
 
 const get = async (id:string)=>{
-  const product:Product[] = await getProductCollection().find({
-    _id: new ObjectId(id)
-  }).toArray()
 
-  return product[0]
+  // Cek valid object id
+  checkValidObjectId(id,messages.product.invalidId)
+
+  const product:Product|null = await getProductCollection().findOne({
+    _id: new ObjectId(id)
+  })
+
+  
+  if (!product) throw new ResponseError(404, messages.product.notFound);
+
+  return product
 }
 
-const create = async (body:ProductRequestBody)=>{
-  const product = validate<ProductRequestBody>(postProductValidation,body)
+const create = async (body:PostProduct)=>{
+  const product = validate<PostProduct>(postProductValidation,body)
 
   // CEK APAKAH NAMA SUDAH DIGUNAKAN
   const isNameTaken:boolean = await checkProductName(product.name)
@@ -99,7 +107,8 @@ const create = async (body:ProductRequestBody)=>{
       width: product.size_width
     },
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
+    image: null
   })
 
   return {
@@ -108,8 +117,8 @@ const create = async (body:ProductRequestBody)=>{
   }
 }
 
-const update = (id:string)=>{
-
+const update = (id:string,body:PostProduct)=>{
+  // CODE HERE...
 }
 
 const remove = (id:string)=>{
