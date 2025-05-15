@@ -10,3 +10,11 @@ export interface User{
   createdAt:Date,
   updatedAt:Date
 }
+
+export interface UserJwtPayload{
+  _id: ObjectId,
+  firstName: string,
+  lastName: string,
+  username: string,
+  role: string
+}

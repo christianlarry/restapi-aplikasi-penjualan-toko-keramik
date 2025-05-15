@@ -1,7 +1,7 @@
 import { db } from "@/application/database"
 import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
-import { User } from "@/interfaces/user.interface"
+import { User, UserJwtPayload } from "@/interfaces/user.interface"
 import { LoginUserRequest, loginUserValidation, RegisterUserRequest, registerUserValidation } from "@/validations/user.validation"
 import { validate } from "@/validations/validation"
 import bcrypt from "bcrypt"
@@ -12,7 +12,7 @@ const JWT_SECRET:string = process.env.JWT_SECRET || ""
 const getUsersCollection = ()=>{
   return db.collection<User>("users")
 }
-const checkUserExist = async (username:string):Promise<boolean>=>{
+export const checkUserExist = async (username:string):Promise<boolean>=>{
   const userExist = await getUsersCollection().findOne({username: username})
 
   return !!userExist
@@ -58,7 +58,7 @@ const login = async (body:LoginUserRequest)=>{
   if(!isValidPassword) throw new ResponseError(400, messages.user.wrongPassword)
   
   // Payload jwt
-  const payload = {
+  const payload:UserJwtPayload = {
     _id: user._id,
     firstName: user.firstName,
     lastName: user.lastName,
