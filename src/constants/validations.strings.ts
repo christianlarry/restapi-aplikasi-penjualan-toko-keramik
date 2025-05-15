@@ -14,4 +14,12 @@ export const validationsStrings = {
     imageFileRequired: "Image file is required",
     invalidImageFile: "Only image files are allowed (.jpg, .jpeg, .png)"
   },
+  user:{
+    firstNameRequired: "First name is required",
+    lastNameRequired: "Last name is required",
+    usernameTooShort: "Username must be at least 3 characters",
+    usernameTooLong: "Username must be less than 20 characters",
+    passwordTooShort: "Password must be at least 6 characters",
+    roleInvalid: "Role must be one of: admin, user"
+  }
 };

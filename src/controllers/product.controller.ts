@@ -7,8 +7,6 @@ const fallbackPaginationPage = 1;
 import productService from "@/services/product.service";
 import { responseOk } from "@/utils/response";
 import { ProductFilters, PostProduct, PutProduct } from "@/interfaces/products.interface";
-import { ResponseError } from "@/errors/response.error";
-import { validationsStrings } from "@/constants/validations.strings";
 
 const getMany = async (req: Request, res: Response, next: NextFunction) => {
   try {
