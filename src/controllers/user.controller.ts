@@ -1,6 +1,6 @@
 import userService from "@/services/user.service"
 import { responseOk } from "@/utils/response"
-import { RegisterUserRequest } from "@/validations/user.validation"
+import { LoginUserRequest, RegisterUserRequest } from "@/validations/user.validation"
 import { NextFunction, Request, Response } from "express"
 
 const register = async (req:Request,res:Response,next:NextFunction)=>{
@@ -17,6 +17,19 @@ const register = async (req:Request,res:Response,next:NextFunction)=>{
   }
 }
 
+const login = async (req:Request,res:Response,next:NextFunction)=>{
+  try {
+    const body:LoginUserRequest = req.body
+
+    const result = await userService.login(body)
+
+    responseOk(res,200,result)
+  } catch (err) {
+    next(err)
+  }
+}
+
 export default{
-  register
+  register,
+  login
 }

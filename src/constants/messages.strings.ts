@@ -8,6 +8,8 @@ export const messages = {
     errorFailedRenameUploadedImage: "Failed to rename uploaded image"
   },
   user:{
-    usernameExist: "Username already exist"
+    usernameExist: "Username already exist",
+    notFound: "User not found",
+    wrongPassword: "Wrong password"
   }
 }
