@@ -6,6 +6,10 @@ import jwt from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || ""
 
+export interface CustomRequest extends Request{
+  user?:UserJwtPayload
+}
+
 export const authenticateToken = async (req:Request, _res:Response, next:NextFunction) => {
   try {
     const authHeader = req.headers['authorization']
@@ -20,9 +24,11 @@ export const authenticateToken = async (req:Request, _res:Response, next:NextFun
     const decoded = jwt.verify(token, JWT_SECRET) as UserJwtPayload
 
     const isUserExist = checkUserExist(decoded.username)
-    if (!isUserExist) throw new ResponseError(403, "Forbidden")
-
-    req.user = decoded
+    if (!isUserExist) {
+      throw new ResponseError(403, "Forbidden")
+    }
+    
+    (req as CustomRequest).user = decoded
 
     next()
 

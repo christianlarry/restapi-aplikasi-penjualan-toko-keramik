@@ -5,6 +5,7 @@ import cors from "cors"
 import publicRoutes from "@routes/public.routes"
 import privateRoutes from "@routes/private.routes"
 import { errorMiddleware } from "@/middlewares/error.middleware"
+import { authenticateToken } from "@/middlewares/auth.middleware"
 
 export const web:Express = express()
 
@@ -17,7 +18,7 @@ web.use(cors())
 // Routes
 // ------ Some routes here -------
 web.use("/api",publicRoutes)
-web.use("/api",privateRoutes) 
+web.use("/api",authenticateToken,privateRoutes) 
 
 // Bottom Middleware
 web.use(errorMiddleware)
