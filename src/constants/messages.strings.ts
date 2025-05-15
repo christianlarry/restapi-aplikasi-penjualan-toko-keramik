@@ -6,5 +6,8 @@ export const messages = {
     errorProductNotUpdated: "Failed to update product image",
     errorProductNotFoundAfterUpdate:"Unexpected error: product missing after update",
     errorFailedRenameUploadedImage: "Failed to rename uploaded image"
+  },
+  user:{
+    usernameExist: "Username already exist"
   }
 }

@@ -8,7 +8,7 @@ const register = async (req:Request,res:Response,next:NextFunction)=>{
     // Ambil request body
     const body:RegisterUserRequest = req.body
 
-    const result = userService.register(body)
+    const result = await userService.register(body)
 
     responseOk(res,201,result)
 
