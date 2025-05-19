@@ -24,6 +24,7 @@ export interface ProductFilters{
   texture?:string,
   finishing?:string,
   color?:string,
+  type?:string,
   size?:{
     height:number,
     width:number

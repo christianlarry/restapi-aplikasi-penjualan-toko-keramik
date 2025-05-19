@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken"
 
 const JWT_SECRET = process.env.JWT_SECRET || ""
 
-export interface CustomRequest extends Request{
+export interface WithUserRequest extends Request{
   user?:UserJwtPayload
 }
 
@@ -28,7 +28,7 @@ export const authenticateToken = async (req:Request, _res:Response, next:NextFun
       throw new ResponseError(403, "Forbidden")
     }
     
-    (req as CustomRequest).user = decoded
+    (req as WithUserRequest).user = decoded
 
     next()
 

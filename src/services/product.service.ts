@@ -20,6 +20,7 @@ const getProductFilters = (filters:ProductFilters,searchQuery?:string)=>{
       ...(filters.texture && { texture: filters.texture }),
       ...(filters.color && { color: filters.color }),
       ...(filters.finishing && { finishing: filters.finishing }),
+      ...(filters.type && {type: filters.type}),
       ...(filters.size && { 
         "size.width": filters.size.width,
         "size.height": filters.size.height 

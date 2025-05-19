@@ -16,6 +16,7 @@ const getMany = async (req: Request, res: Response, next: NextFunction) => {
       finishing: req.query.finishing?.toString(),
       color: req.query.color?.toString(),
       design: req.query.design?.toString(),
+      type: req.query.desgin?.toString(),
       size:
         req.query.size_height && req.query.size_width
           ? {
