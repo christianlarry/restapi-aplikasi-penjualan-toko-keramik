@@ -57,7 +57,7 @@ const getPaginated = async (page:number,size:number,searchQuery:string|undefined
     .limit(size)
     .toArray()
 
-  const total = product.length
+  const total = await getProductCollection().countDocuments()
   const totalPages = Math.ceil(total/size) 
 
   const pagination:Pagination = {
