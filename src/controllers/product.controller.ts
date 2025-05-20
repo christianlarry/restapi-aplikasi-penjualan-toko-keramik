@@ -66,6 +66,16 @@ const get = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const getProductFilterOptions = async (req: Request, res: Response, next: NextFunction)=>{
+  try {
+    const result = await productService.getProductFilterOptions()
+
+    responseOk(res,200,result)
+  } catch (err) {
+    next(err)
+  }
+}
+
 const add = async (req: Request, res: Response, next: NextFunction) => {
   try {
 
@@ -112,6 +122,7 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
 export default {
   getMany,
   get,
+  getProductFilterOptions,
   add,
   update,
   remove,

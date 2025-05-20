@@ -25,7 +25,7 @@ const uploadProductImage = async (
   if(!product) throw new ResponseError(404,messages.product.notFound)
 
   // Hapus image sebelumnnya jika ada
-  if(product.image) deleteFile(product.image)
+  if(product.image) deleteFile("public\\"+product.image)
 
   // Ganti nama file
   const dateNow = new Date()
@@ -43,7 +43,7 @@ const uploadProductImage = async (
     _id: productObjectId
   },{
     $set:{
-      image: newPath,
+      image: newPath.replace(`public\\`,""),
       updatedAt: dateNow
     }
   })

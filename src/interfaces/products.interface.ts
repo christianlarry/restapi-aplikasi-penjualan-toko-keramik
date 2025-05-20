@@ -31,6 +31,17 @@ export interface ProductFilters{
   }
 }
 
+interface FilterOption{
+  label:string,
+  value:string
+}
+
+export interface ProductFilterOptions{
+  _id: ObjectId,
+  type:string,
+  options:FilterOption[]
+}
+
 export interface PostProduct{
   name: string,
   type: string,

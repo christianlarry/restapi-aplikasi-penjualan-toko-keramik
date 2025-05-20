@@ -1,7 +1,7 @@
 import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
-import { Product, ProductFilters, PostProduct } from "@/interfaces/products.interface"
+import { Product, ProductFilters, PostProduct, ProductFilterOptions } from "@/interfaces/products.interface"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { deleteFile } from "@/utils/deleteFile"
 import { postProductValidation, putProductValidation } from "@/validations/product.validation"
@@ -14,6 +14,10 @@ const strCollectionProduct:string = "products"
 export const getProductCollection = ()=>{
   return db.collection<Product>(strCollectionProduct)
 }
+export const getProductFilterOptionsCollection = ()=>{
+  return db.collection<ProductFilterOptions>("product_filter_options")
+}
+
 const getProductFilters = (filters:ProductFilters,searchQuery?:string)=>{
   return {
       ...(filters.design && { design: filters.design }),
@@ -42,6 +46,35 @@ const checkProductName = async (productName:string):Promise<boolean>=>{
     
     return !!existing
 }
+const updateFilterOptionsFromProduct = async (product: Product) => {
+  const collection = await getProductFilterOptionsCollection();
+
+  const filtersToCheck = [
+    { type: "design", value: product.design },
+    { type: "texture", value: product.texture },
+    { type: "color", value: product.color },
+    { type: "finishing", value: product.finishing },
+    { type: "type", value: product.type }
+  ];
+
+  for (const filter of filtersToCheck) {
+    await collection.updateOne(
+      { type: filter.type, "options.value": { $ne: filter.value } }, // hanya update jika value belum ada
+      {
+        $push: { options: { label: filter.value, value: filter.value } }
+      }
+    );
+  }
+
+  // Handle size as unique pair
+  const sizeValue = `${product.size.width}x${product.size.height}`;
+  await collection.updateOne(
+    { type: "size", "options.value": { $ne: sizeValue } },
+    {
+      $push: { options: { label: sizeValue, value: sizeValue } }
+    }
+  );
+}
 
 const getMany = async (searchQuery:string|undefined,filters:ProductFilters)=>{
   const product:Product[] = await getProductCollection().find(getProductFilters(filters,searchQuery)).toArray()
@@ -57,7 +90,7 @@ const getPaginated = async (page:number,size:number,searchQuery:string|undefined
     .limit(size)
     .toArray()
 
-  const total = await getProductCollection().countDocuments()
+  const total = (await getProductCollection().find(getProductFilters(filters,searchQuery)).toArray()).length
   const totalPages = Math.ceil(total/size) 
 
   const pagination:Pagination = {
@@ -88,6 +121,12 @@ const get = async (id:string)=>{
   return product
 }
 
+const getProductFilterOptions = async ()=>{
+  const productFilterOptions:ProductFilterOptions[] = await getProductFilterOptionsCollection().find().toArray()
+
+  return productFilterOptions
+}
+
 const create = async (body:PostProduct)=>{
   const product = validate<PostProduct>(postProductValidation,body)
 
@@ -112,6 +151,12 @@ const create = async (body:PostProduct)=>{
     updatedAt: new Date(),
     image: null
   })
+
+  if(result.acknowledged){
+    const newProduct = await getProductCollection().findOne({_id: result.insertedId})
+
+    if(newProduct) await updateFilterOptionsFromProduct(newProduct)
+  }
 
   return {
     _id: result.insertedId,
@@ -150,6 +195,8 @@ const update = async (id:string,body:PostProduct)=>{
   )
 
   if(!result) throw new ResponseError(404, messages.product.notFound)
+  
+  await updateFilterOptionsFromProduct(result)
 
   return result
 }
@@ -172,6 +219,7 @@ export default {
   get,
   getPaginated,
   getMany,
+  getProductFilterOptions,
   create,
   update,
   remove
