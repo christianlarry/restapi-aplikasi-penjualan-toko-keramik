@@ -1,10 +1,10 @@
 import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
-import { Product, ProductFilters, PostProduct, ProductFilterOptions } from "@/interfaces/products.interface"
+import { Product, ProductFilters, ProductFilterOptions } from "@/interfaces/products.interface"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { deleteFile } from "@/utils/deleteFile"
-import { postProductValidation, putProductValidation } from "@/validations/product.validation"
+import { PostProduct, postProductValidation, PutProduct, putProductValidation } from "@/validations/product.validation"
 import { validate } from "@/validations/validation"
 import { db } from "@application/database"
 import { ObjectId } from "mongodb"
@@ -137,6 +137,7 @@ const create = async (body:PostProduct)=>{
 
   const result = await getProductCollection().insertOne({
     name: product.name,
+    ...(product.description && {description: product.description}),
     type: product.type,
     design: product.design,
     color: product.color,
@@ -148,9 +149,11 @@ const create = async (body:PostProduct)=>{
       height: product.size_height,
       width: product.size_width
     },
+    isSlipResistant: product.is_slip_resistant,
+    isWaterResistant: product.is_water_resistant,
+    ...(product.recommended && {recommended: product.recommended}),
     createdAt: new Date(),
-    updatedAt: new Date(),
-    image: null
+    updatedAt: new Date()
   })
 
   if(result.acknowledged) await updateFilterOptionsFromProduct()
@@ -161,8 +164,8 @@ const create = async (body:PostProduct)=>{
   }
 }
 
-const update = async (id:string,body:PostProduct)=>{
-  const product:PostProduct = validate(putProductValidation,body)
+const update = async (id:string,body:PutProduct)=>{
+  const product:PutProduct = validate(putProductValidation,body)
 
   // Cek apakah id valid
   checkValidObjectId(id,messages.product.invalidId)
@@ -176,6 +179,10 @@ const update = async (id:string,body:PostProduct)=>{
     {
       $set:{
         name: product.name,
+        ...(product.description && {description: product.description}),
+        ...(product.recommended && {recommended: product.recommended}),
+        isSlipResistant: product.is_slip_resistant,
+        isWaterResistant: product.is_water_resistant,
         type: product.type,
         design: product.design,
         color: product.color,

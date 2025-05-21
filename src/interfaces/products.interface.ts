@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb"
 export interface Product{
   _id?: ObjectId,
   name: string,
+  description?: string,
   type: string,
   design: string,
   size: {
@@ -14,7 +15,10 @@ export interface Product{
   texture: string,
   brand: string,
   price: number,
-  image?: string | null,
+  image?: string,
+  isWaterResistant:boolean,
+  isSlipResistant:boolean,
+  recommended?: string[],
   createdAt: Date,
   updatedAt: Date
 }
@@ -42,17 +46,21 @@ export interface ProductFilterOptions{
   options:FilterOption[]
 }
 
-export interface PostProduct{
-  name: string,
-  type: string,
-  design: string,
-  size_width: number,
-  size_height: number,
-  color: string,
-  finishing: string,
-  texture: string,
-  brand: string,
-  price: number
-}
+// export interface PostProduct{
+//   name: string,
+//   description?:string,
+//   type: string,
+//   design: string,
+//   size_width: number,
+//   size_height: number,
+//   color: string,
+//   finishing: string,
+//   texture: string,
+//   brand: string,
+//   price: number,
+//   is_water_resistant: boolean,
+//   is_slip_resistant: boolean,
+//   recommended?: string[]
+// }
 
-export interface PutProduct extends PostProduct{}
+// export interface PutProduct extends PostProduct{}
