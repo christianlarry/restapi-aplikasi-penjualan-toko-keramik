@@ -16,7 +16,7 @@ const getMany = async (req: Request, res: Response, next: NextFunction) => {
       finishing: req.query.finishing?.toString(),
       color: req.query.color?.toString(),
       design: req.query.design?.toString(),
-      type: req.query.desgin?.toString(),
+      type: req.query.type?.toString(),
       size:
         req.query.size_height && req.query.size_width
           ? {
@@ -44,8 +44,8 @@ const getMany = async (req: Request, res: Response, next: NextFunction) => {
 
       return;
     }
-    // END IF NEED PAGINATION ---
 
+    // END IF NEED PAGINATION ---
     const products = await productService.getMany(searchQuery, filters);
 
     responseOk(res, 200, products);
@@ -66,7 +66,7 @@ const get = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const getProductFilterOptions = async (req: Request, res: Response, next: NextFunction)=>{
+const getProductFilterOptions = async (_req: Request, res: Response, next: NextFunction)=>{
   try {
     const result = await productService.getProductFilterOptions()
 

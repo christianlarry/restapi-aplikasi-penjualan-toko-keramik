@@ -21,16 +21,18 @@ export const authenticateToken = async (req:Request, _res:Response, next:NextFun
     // const [invalidToken] = await getInvalidAccessTokenByToken(token)
     // if (invalidToken.length != 0 || invalidToken.length === 1) return res.sendStatus(403)
   
-    const decoded = jwt.verify(token, JWT_SECRET) as UserJwtPayload
+    jwt.verify(token, JWT_SECRET, (err,decoded)=>{
+      if (err) throw new ResponseError(403,"Forbidden")
 
-    const isUserExist = checkUserExist(decoded.username)
-    if (!isUserExist) {
-      throw new ResponseError(403, "Forbidden")
-    }
+      const isUserExist = checkUserExist((decoded as UserJwtPayload).username)
+      if (!isUserExist) {
+        throw new ResponseError(403, "Forbidden")
+      }
     
-    (req as WithUserRequest).user = decoded
-
-    next()
+      (req as WithUserRequest).user = decoded as UserJwtPayload
+    
+      next()
+    })
 
   } catch (err) {
     next(err)

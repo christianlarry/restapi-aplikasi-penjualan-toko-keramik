@@ -6,7 +6,7 @@ import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { deleteFile } from "@/utils/deleteFile"
 import { postProductValidation, putProductValidation } from "@/validations/product.validation"
 import { validate } from "@/validations/validation"
-import {db} from "@application/database"
+import { db } from "@application/database"
 import { ObjectId } from "mongodb"
 
 // VARIABEL
@@ -41,39 +41,40 @@ const getProductFilters = (filters:ProductFilters,searchQuery?:string)=>{
     })
     }
 }
+
 const checkProductName = async (productName:string):Promise<boolean>=>{
     const existing = await getProductCollection().findOne({name: productName})
     
     return !!existing
 }
-const updateFilterOptionsFromProduct = async (product: Product) => {
-  const collection = await getProductFilterOptionsCollection();
+
+const updateFilterOptionsFromProduct = async () => {
+  const designOptions = await getProductCollection().distinct("design")
+  const typeOptions = await getProductCollection().distinct("type")
+  const textureOptions = await getProductCollection().distinct("texture")
+  const finishingOptions = await getProductCollection().distinct("finishing")
+  const colorOptions = await getProductCollection().distinct("color")
+  const sizeOptions = await getProductCollection().distinct("size")
 
   const filtersToCheck = [
-    { type: "design", value: product.design },
-    { type: "texture", value: product.texture },
-    { type: "color", value: product.color },
-    { type: "finishing", value: product.finishing },
-    { type: "type", value: product.type }
+    { type: "design", options: designOptions },
+    { type: "texture", options: textureOptions },
+    { type: "color", options: colorOptions },
+    { type: "finishing", options: finishingOptions },
+    { type: "type", options: typeOptions },
+    { type: "size", options: sizeOptions.map(val=>`${val.width}x${val.height}`)}
   ];
 
   for (const filter of filtersToCheck) {
-    await collection.updateOne(
-      { type: filter.type, "options.value": { $ne: filter.value } }, // hanya update jika value belum ada
+    await getProductFilterOptionsCollection().updateOne(
+      { type: filter.type }, // hanya update jika value belum ada
       {
-        $push: { options: { label: filter.value, value: filter.value } }
+        $set: {
+          options: filter.options.map(val=>({label:val,value:val}))
+        }
       }
     );
   }
-
-  // Handle size as unique pair
-  const sizeValue = `${product.size.width}x${product.size.height}`;
-  await collection.updateOne(
-    { type: "size", "options.value": { $ne: sizeValue } },
-    {
-      $push: { options: { label: sizeValue, value: sizeValue } }
-    }
-  );
 }
 
 const getMany = async (searchQuery:string|undefined,filters:ProductFilters)=>{
@@ -152,11 +153,7 @@ const create = async (body:PostProduct)=>{
     image: null
   })
 
-  if(result.acknowledged){
-    const newProduct = await getProductCollection().findOne({_id: result.insertedId})
-
-    if(newProduct) await updateFilterOptionsFromProduct(newProduct)
-  }
+  if(result.acknowledged) await updateFilterOptionsFromProduct()
 
   return {
     _id: result.insertedId,
@@ -170,7 +167,11 @@ const update = async (id:string,body:PostProduct)=>{
   // Cek apakah id valid
   checkValidObjectId(id,messages.product.invalidId)
 
-  const result = await getProductCollection().findOneAndUpdate(
+  // Cek apakah produk ada
+  const isProductExist = await getProductCollection().findOne({_id: new ObjectId(id)})
+  if(!isProductExist) throw new ResponseError(404, messages.product.notFound)
+
+  const result = await getProductCollection().updateOne(
     { _id: new ObjectId(id) },
     {
       $set:{
@@ -188,17 +189,17 @@ const update = async (id:string,body:PostProduct)=>{
         },
         updatedAt: new Date()
       }
-    },
-    {
-      returnDocument: "after"
     }
   )
 
-  if(!result) throw new ResponseError(404, messages.product.notFound)
+  if(result.modifiedCount <= 0) throw new ResponseError(500,messages.product.errorProductNotUpdated)
   
-  await updateFilterOptionsFromProduct(result)
+  // Update isi dari Filter Options
+  await updateFilterOptionsFromProduct()
 
-  return result
+  return {
+    body
+  }
 }
 
 const remove = async (id:string)=>{
@@ -211,6 +212,9 @@ const remove = async (id:string)=>{
   if(!result) throw new ResponseError(404,messages.product.notFound)
 
   if(result.image) deleteFile(result.image)
+    
+  // Update isi dari Filter Options
+  await updateFilterOptionsFromProduct()
 
   return result
 }

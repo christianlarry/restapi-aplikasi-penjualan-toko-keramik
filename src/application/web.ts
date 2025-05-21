@@ -1,5 +1,6 @@
 import express,{Express} from "express"
 import cors from "cors"
+import morgan from "morgan"
 
 // IMPORT ROUTES
 import publicRoutes from "@routes/public.routes"
@@ -14,6 +15,7 @@ web.use(express.json())
 web.use(express.urlencoded({extended: true}))
 web.use(express.static("public"))
 web.use(cors())
+web.use(morgan("common"))
 
 // Routes
 // ------ Some routes here -------
