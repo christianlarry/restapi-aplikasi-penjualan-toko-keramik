@@ -8,23 +8,18 @@ import productService from "@/services/product.service";
 import { responseOk } from "@/utils/response";
 import { ProductFilters } from "@/interfaces/products.interface";
 import { PostProduct, PutProduct } from "@/validations/product.validation";
+import { parseQueryArray, parseQuerySizeToArray } from "@/utils/queryFormatter";
 
 const getMany = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // FILTERS
     const filters: ProductFilters = {
-      texture: req.query.texture?.toString(),
-      finishing: req.query.finishing?.toString(),
-      color: req.query.color?.toString(),
-      design: req.query.design?.toString(),
-      type: req.query.type?.toString(),
-      size:
-        req.query.size_height && req.query.size_width
-          ? {
-              height: Number(req.query.size_height),
-              width: Number(req.query.size_width),
-            }
-          : undefined,
+      texture: parseQueryArray(req.query.texture?.toString()),
+      finishing: parseQueryArray(req.query.finishing?.toString()),
+      color: parseQueryArray(req.query.color?.toString()),
+      design: parseQueryArray(req.query.design?.toString()),
+      application: parseQueryArray(req.query.type?.toString()),
+      size: parseQuerySizeToArray(req.query.size?.toString())
     };
 
     // SEARCH QUERY

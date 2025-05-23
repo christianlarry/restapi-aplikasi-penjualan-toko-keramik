@@ -7,7 +7,7 @@ import { deleteFile } from "@/utils/deleteFile"
 import { PostProduct, postProductValidation, PutProduct, putProductValidation } from "@/validations/product.validation"
 import { validate } from "@/validations/validation"
 import { db } from "@application/database"
-import { ObjectId } from "mongodb"
+import { Filter, ObjectId } from "mongodb"
 
 // VARIABEL
 const strCollectionProduct:string = "products"
@@ -18,16 +18,18 @@ export const getProductFilterOptionsCollection = ()=>{
   return db.collection<ProductFilterOptions>("product_filter_options")
 }
 
-const getProductFilters = (filters:ProductFilters,searchQuery?:string)=>{
+const getProductFilters = (filters:ProductFilters,searchQuery?:string):Filter<Product>=>{
   return {
-      ...(filters.design && { design: filters.design }),
-      ...(filters.texture && { texture: filters.texture }),
-      ...(filters.color && { color: filters.color }),
-      ...(filters.finishing && { finishing: filters.finishing }),
-      ...(filters.type && {type: filters.type}),
-      ...(filters.size && { 
-        "size.width": filters.size.width,
-        "size.height": filters.size.height 
+      ...(filters.design && { design: {$in: filters.design} }),
+      ...(filters.texture && { texture: {$in: filters.texture} }),
+      ...(filters.color && { color: {$in: filters.color} }),
+      ...(filters.finishing && { finishing: {$in: filters.finishing} }),
+      ...(filters.application && {type: {$in: filters.application}}),
+      ...(filters.size && {
+        $or: filters.size.map(size => ({
+          "size.width": size.width,
+          "size.height": size.height 
+        })) 
       }),
       ...(searchQuery && {
       $or:[
@@ -50,7 +52,7 @@ const checkProductName = async (productName:string):Promise<boolean>=>{
 
 const updateFilterOptionsFromProduct = async () => {
   const designOptions = await getProductCollection().distinct("design")
-  const typeOptions = await getProductCollection().distinct("type")
+  const applicationOptions = await getProductCollection().distinct("application")
   const textureOptions = await getProductCollection().distinct("texture")
   const finishingOptions = await getProductCollection().distinct("finishing")
   const colorOptions = await getProductCollection().distinct("color")
@@ -61,7 +63,7 @@ const updateFilterOptionsFromProduct = async () => {
     { type: "texture", options: textureOptions },
     { type: "color", options: colorOptions },
     { type: "finishing", options: finishingOptions },
-    { type: "type", options: typeOptions },
+    { type: "application", options: applicationOptions },
     { type: "size", options: sizeOptions.map(val=>`${val.width}x${val.height}`)}
   ];
 
@@ -72,6 +74,9 @@ const updateFilterOptionsFromProduct = async () => {
         $set: {
           options: filter.options.map(val=>({label:val,value:val}))
         }
+      },
+      {
+        upsert: true
       }
     );
   }
@@ -138,19 +143,21 @@ const create = async (body:PostProduct)=>{
   const result = await getProductCollection().insertOne({
     name: product.name,
     ...(product.description && {description: product.description}),
-    type: product.type,
-    design: product.design,
-    color: product.color,
-    finishing: product.finishing,
-    texture: product.texture,
+    specification: {
+      application: product.application,
+      color: product.color,
+      design: product.design,
+      finishing: product.finishing,
+      texture: product.texture,
+      size:{
+        height: product.sizeHeight,
+        width: product.sizeWidth
+      },
+      isSlipResistant: product.isSlipResistant,
+      isWaterResistant: product.isWaterResistant
+    },
     brand: product.brand,
     price: product.price,
-    size:{
-      height: product.size_height,
-      width: product.size_width
-    },
-    isSlipResistant: product.is_slip_resistant,
-    isWaterResistant: product.is_water_resistant,
     ...(product.recommended && {recommended: product.recommended}),
     createdAt: new Date(),
     updatedAt: new Date()
@@ -181,19 +188,21 @@ const update = async (id:string,body:PutProduct)=>{
         name: product.name,
         ...(product.description && {description: product.description}),
         ...(product.recommended && {recommended: product.recommended}),
-        isSlipResistant: product.is_slip_resistant,
-        isWaterResistant: product.is_water_resistant,
-        type: product.type,
-        design: product.design,
-        color: product.color,
-        finishing: product.finishing,
-        texture: product.texture,
+        specification: {
+          isSlipResistant: product.isSlipResistant,
+          isWaterResistant: product.isWaterResistant,
+          application: product.application,
+          design: product.design,
+          color: product.color,
+          finishing: product.finishing,
+          texture: product.texture,
+          size:{
+            height: product.sizeHeight,
+            width: product.sizeWidth
+          },
+        },
         brand: product.brand,
         price: product.price,
-        size:{
-          height: product.size_height,
-          width: product.size_width
-        },
         updatedAt: new Date()
       }
     }

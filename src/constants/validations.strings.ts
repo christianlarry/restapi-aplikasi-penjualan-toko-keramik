@@ -2,7 +2,7 @@ export const validationsStrings = {
   product: {
     idRequired: "Product id is required",
     nameRequired: "Product name is required",
-    typeRequired: "Type must be either 'Lantai' or 'Dinding'",
+    applicationRequired: "Type must be either 'Lantai' or 'Dinding'",
     designRequired: "Design is required",
     sizeWidthPositive: "Width must be a positive number",
     sizeHeightPositive: "Height must be a positive number",

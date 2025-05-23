@@ -4,35 +4,37 @@ export interface Product{
   _id?: ObjectId,
   name: string,
   description?: string,
-  type: string,
-  design: string,
-  size: {
-    width: number,
-    height: number
-  },
-  color: string,
-  finishing: string,
-  texture: string,
+  specification:{
+    size: {
+      width: number,
+      height: number
+    },
+    application: string[],
+    design: string,
+    color: string[],
+    finishing: string,
+    texture: string,
+    isWaterResistant:boolean,
+    isSlipResistant:boolean,
+  }
   brand: string,
   price: number,
   image?: string,
-  isWaterResistant:boolean,
-  isSlipResistant:boolean,
   recommended?: string[],
   createdAt: Date,
   updatedAt: Date
 }
 
 export interface ProductFilters{
-  design?:string,
-  texture?:string,
-  finishing?:string,
-  color?:string,
-  type?:string,
+  design?:string[],
+  texture?:string[],
+  finishing?:string[],
+  color?:string[],
+  application?:string[],
   size?:{
-    height:number,
-    width:number
-  }
+    width:string,
+    height:string
+  }[]
 }
 
 interface FilterOption{
