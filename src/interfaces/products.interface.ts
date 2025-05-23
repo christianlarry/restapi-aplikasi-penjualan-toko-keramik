@@ -32,8 +32,8 @@ export interface ProductFilters{
   color?:string[],
   application?:string[],
   size?:{
-    width:string,
-    height:string
+    width:number,
+    height:number
   }[]
 }
 
