@@ -58,12 +58,12 @@ const checkProductName = async (productName: string): Promise<boolean> => {
 }
 
 const updateFilterOptionsFromProduct = async () => {
-  const designOptions = await getProductCollection().distinct("design")
-  const applicationOptions = await getProductCollection().distinct("application")
-  const textureOptions = await getProductCollection().distinct("texture")
-  const finishingOptions = await getProductCollection().distinct("finishing")
-  const colorOptions = await getProductCollection().distinct("color")
-  const sizeOptions = await getProductCollection().distinct("size")
+  const designOptions = await getProductCollection().distinct("specification.design")
+  const applicationOptions = await getProductCollection().distinct("specification.application")
+  const textureOptions = await getProductCollection().distinct("specification.texture")
+  const finishingOptions = await getProductCollection().distinct("specification.finishing")
+  const colorOptions = await getProductCollection().distinct("specification.color")
+  const sizeOptions = await getProductCollection().distinct("specification.size")
 
   const filtersToCheck = [
     { type: "design", options: designOptions },
