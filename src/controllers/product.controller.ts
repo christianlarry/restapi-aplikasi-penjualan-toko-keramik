@@ -6,7 +6,7 @@ const fallbackPaginationPage = 1;
 
 import productService from "@/services/product.service";
 import { responseOk } from "@/utils/response";
-import { ProductFilters } from "@/interfaces/products.interface";
+import { ProductFilters, ProductOrderBy } from "@/interfaces/products.interface";
 import { PostProduct, PutProduct } from "@/validations/product.validation";
 import { FilterQuery, parseQueryArray, parseQuerySizeToArray } from "@/utils/queryFormatter";
 
@@ -25,6 +25,9 @@ const getMany = async (req: Request, res: Response, next: NextFunction) => {
     // SEARCH QUERY
     const searchQuery: string | undefined = req.query.search?.toString();
 
+    // ORDER BY Query
+    const orderBy:string | undefined = req.query.orderBy?.toString()
+
     // IF NEED PAGINATION
     const { pagination_size, pagination_page } = req.query;
 
@@ -42,7 +45,7 @@ const getMany = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     // END IF NEED PAGINATION ---
-    const products = await productService.getMany(searchQuery, filters);
+    const products = await productService.getMany(searchQuery, filters, orderBy as ProductOrderBy);
 
     responseOk(res, 200, products);
   } catch (err) {

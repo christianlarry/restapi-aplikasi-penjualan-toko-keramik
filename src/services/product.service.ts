@@ -1,14 +1,13 @@
-import { logger } from "@/application/logging"
 import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
-import { Product, ProductFilters, ProductFilterOptions } from "@/interfaces/products.interface"
+import { Product, ProductFilters, ProductFilterOptions, ProductOrderBy } from "@/interfaces/products.interface"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { deleteFile } from "@/utils/deleteFile"
 import { PostProduct, postProductValidation, PutProduct, putProductValidation } from "@/validations/product.validation"
 import { validate } from "@/validations/validation"
 import { db } from "@application/database"
-import { Filter, ObjectId } from "mongodb"
+import { Filter, FindCursor, ObjectId, WithId } from "mongodb"
 
 // VARIABEL
 const strCollectionProduct: string = "products"
@@ -37,7 +36,8 @@ const getProductFilters = (filters: ProductFilters, searchQuery?: string): Filte
       { "specification.color": { $regex: searchQuery, $options: "i" } },
       { "specification.finishing": { $regex: searchQuery, $options: "i" } },
       { name: { $regex: searchQuery, $options: "i" } },
-      { brand: { $regex: searchQuery, $options: "i" } }
+      { brand: { $regex: searchQuery, $options: "i" } },
+      { description: { $regex: searchQuery, $options: "i" } }
     ])
   }
 
@@ -89,20 +89,49 @@ const updateFilterOptionsFromProduct = async () => {
   }
 }
 
-const getMany = async (searchQuery: string | undefined, filters: ProductFilters) => {
+const orderedProduct = (orderBy:ProductOrderBy|undefined,findCursor:FindCursor<WithId<Product>>)=>{
+  switch(orderBy){
+    case "price_htl":
+      return findCursor.sort("price","desc")
+    case "price_lth":
+      return findCursor.sort("price","asc")
+    case "name_atz":
+      return findCursor.sort("name","desc")
+    default:
+      return findCursor
+  }
+}
 
-  const product: Product[] = await getProductCollection().find(getProductFilters(filters, searchQuery)).toArray()
+const getMany = async (
+  searchQuery: string | undefined, 
+  filters: ProductFilters,
+  orderBy?: ProductOrderBy
+) => {
+  
+  const findProductResult = await getProductCollection().find(getProductFilters(filters, searchQuery))
+
+  const product: Product[] = await orderedProduct(
+    orderBy,
+    findProductResult
+  ).toArray()
 
   return product
 }
 
-const getPaginated = async (page: number, size: number, searchQuery: string | undefined, filters: ProductFilters) => {
+const getPaginated = async (
+  page: number, 
+  size: number, 
+  searchQuery: string | undefined, 
+  filters: ProductFilters,
+  orderBy?:ProductOrderBy
+) => {
 
-  const product: Product[] = await getProductCollection()
+  const findProductResult = await getProductCollection()
     .find(getProductFilters(filters, searchQuery))
     .skip((page - 1) * size)
     .limit(size)
-    .toArray()
+
+  const product:Product[] = await orderedProduct(orderBy,findProductResult).toArray()
 
   const total = (await getProductCollection().find(getProductFilters(filters, searchQuery)).toArray()).length
   const totalPages = Math.ceil(total / size)

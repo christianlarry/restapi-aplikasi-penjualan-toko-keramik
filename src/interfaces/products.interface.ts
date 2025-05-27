@@ -37,6 +37,8 @@ export interface ProductFilters{
   }[]
 }
 
+export type ProductOrderBy = "price_htl"|"price_lth"|"name_atz"
+
 interface FilterOption{
   label:string,
   value:string
