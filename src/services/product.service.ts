@@ -2,6 +2,7 @@ import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
 import { Product, ProductFilters, ProductFilterOptions, ProductOrderBy } from "@/interfaces/products.interface"
+import {productModel} from "@/models/product.model"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { deleteFile } from "@/utils/deleteFile"
 import { PostProduct, postProductValidation, PutProduct, putProductValidation } from "@/validations/product.validation"
@@ -9,11 +10,6 @@ import { validate } from "@/validations/validation"
 import { db } from "@application/database"
 import { Filter, FindCursor, ObjectId, WithId } from "mongodb"
 
-// VARIABEL
-const strCollectionProduct: string = "products"
-export const getProductCollection = () => {
-  return db.collection<Product>(strCollectionProduct)
-}
 export const getProductFilterOptionsCollection = () => {
   return db.collection<ProductFilterOptions>("product_filter_options")
 }
@@ -52,18 +48,18 @@ const getProductFilters = (filters: ProductFilters, searchQuery?: string): Filte
 }
 
 const checkProductName = async (productName: string): Promise<boolean> => {
-  const existing = await getProductCollection().findOne({ name: productName })
+  const existing = await productModel().findOne({ name: productName })
 
   return !!existing
 }
 
 const updateFilterOptionsFromProduct = async () => {
-  const designOptions = await getProductCollection().distinct("specification.design")
-  const applicationOptions = await getProductCollection().distinct("specification.application")
-  const textureOptions = await getProductCollection().distinct("specification.texture")
-  const finishingOptions = await getProductCollection().distinct("specification.finishing")
-  const colorOptions = await getProductCollection().distinct("specification.color")
-  const sizeOptions = await getProductCollection().distinct("specification.size")
+  const designOptions = await productModel().distinct("specification.design")
+  const applicationOptions = await productModel().distinct("specification.application")
+  const textureOptions = await productModel().distinct("specification.texture")
+  const finishingOptions = await productModel().distinct("specification.finishing")
+  const colorOptions = await productModel().distinct("specification.color")
+  const sizeOptions = await productModel().distinct("specification.size")
 
   const filtersToCheck = [
     { type: "design", options: designOptions },
@@ -108,8 +104,9 @@ const getMany = async (
   orderBy?: ProductOrderBy
 ) => {
   
-  const findProductResult = await getProductCollection().find(getProductFilters(filters, searchQuery))
+  const findProductResult = await productModel().find(getProductFilters(filters, searchQuery))
 
+  // Urutkan Product berdasarkan Parameter OrderBy Jika ada
   const product: Product[] = await orderedProduct(
     orderBy,
     findProductResult
@@ -126,14 +123,15 @@ const getPaginated = async (
   orderBy?:ProductOrderBy
 ) => {
 
-  const findProductResult = await getProductCollection()
+  const findProductResult = await productModel()
     .find(getProductFilters(filters, searchQuery))
     .skip((page - 1) * size)
     .limit(size)
 
+  // Urutkan Product berdasarkan Parameter OrderBy Jika ada
   const product:Product[] = await orderedProduct(orderBy,findProductResult).toArray()
 
-  const total = (await getProductCollection().find(getProductFilters(filters, searchQuery)).toArray()).length
+  const total = (await productModel().find(getProductFilters(filters, searchQuery)).toArray()).length
   const totalPages = Math.ceil(total / size)
 
   const pagination: Pagination = {
@@ -154,7 +152,7 @@ const get = async (id: string) => {
   // Cek valid object id
   checkValidObjectId(id, messages.product.invalidId)
 
-  const product: Product | null = await getProductCollection().findOne({
+  const product: Product | null = await productModel().findOne({
     _id: new ObjectId(id)
   })
 
@@ -177,7 +175,7 @@ const create = async (body: PostProduct) => {
   const isNameTaken: boolean = await checkProductName(product.name)
   if (isNameTaken) throw new ResponseError(400, messages.product.nameTaken)
 
-  const result = await getProductCollection().insertOne({
+  const result = await productModel().insertOne({
     name: product.name,
     ...(product.description && { description: product.description }),
     specification: {
@@ -215,10 +213,10 @@ const update = async (id: string, body: PutProduct) => {
   checkValidObjectId(id, messages.product.invalidId)
 
   // Cek apakah produk ada
-  const isProductExist = await getProductCollection().findOne({ _id: new ObjectId(id) })
+  const isProductExist = await productModel().findOne({ _id: new ObjectId(id) })
   if (!isProductExist) throw new ResponseError(404, messages.product.notFound)
 
-  const result = await getProductCollection().updateOne(
+  const result = await productModel().updateOne(
     { _id: new ObjectId(id) },
     {
       $set: {
@@ -258,7 +256,7 @@ const update = async (id: string, body: PutProduct) => {
 const remove = async (id: string) => {
   checkValidObjectId(id, messages.product.invalidId)
 
-  const result = await getProductCollection().findOneAndDelete(
+  const result = await productModel().findOneAndDelete(
     { _id: new ObjectId(id) }
   )
 

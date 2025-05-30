@@ -2,6 +2,7 @@ import { db } from "@/application/database"
 import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
 import { User, UserJwtPayload } from "@/interfaces/user.interface"
+import { userModel } from "@/models/user.model"
 import { LoginUserRequest, loginUserValidation, RegisterUserRequest, registerUserValidation } from "@/validations/user.validation"
 import { validate } from "@/validations/validation"
 import bcrypt from "bcrypt"
@@ -9,11 +10,8 @@ import jwt from "jsonwebtoken"
 
 const JWT_SECRET:string = process.env.JWT_SECRET || ""
 
-const getUsersCollection = ()=>{
-  return db.collection<User>("users")
-}
 export const checkUserExist = async (username:string):Promise<boolean>=>{
-  const userExist = await getUsersCollection().findOne({username: username})
+  const userExist = await userModel().findOne({username: username})
 
   return !!userExist
 }
@@ -29,7 +27,7 @@ const register = async(body:RegisterUserRequest)=>{
   const hashedPassword = await bcrypt.hash(creds.password,10)
 
   // Simpan user ke database
-  const result = await getUsersCollection().insertOne({
+  const result = await userModel().insertOne({
     firstName: creds.firstName,
     lastName: creds.lastName,
     username: creds.username,
@@ -49,7 +47,7 @@ const login = async (body:LoginUserRequest)=>{
   const creds = validate<LoginUserRequest>(loginUserValidation,body)
 
   // Cek user exists dan get user data
-  const user = await getUsersCollection().findOne({username: creds.username})
+  const user = await userModel().findOne({username: creds.username})
   if(!user) throw new ResponseError(400,messages.user.notFound)
 
   // Cek apakah pass valid

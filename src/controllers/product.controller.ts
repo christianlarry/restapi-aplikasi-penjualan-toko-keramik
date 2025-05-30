@@ -36,7 +36,8 @@ const getMany = async (req: Request, res: Response, next: NextFunction) => {
         parseInt(pagination_page as string) || fallbackPaginationPage,
         parseInt(pagination_size as string) || fallbackPaginationSize,
         searchQuery,
-        filters
+        filters,
+        orderBy as ProductOrderBy
       );
 
       responseOk(res, 200, product, pagination);

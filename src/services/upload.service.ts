@@ -1,5 +1,4 @@
 import { ObjectId } from "mongodb"
-import { getProductCollection } from "./product.service"
 import { Product } from "@/interfaces/products.interface"
 import { ResponseError } from "@/errors/response.error"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
@@ -7,6 +6,7 @@ import { messages } from "@/constants/messages.strings"
 import { deleteFile } from "@/utils/deleteFile"
 import path from "path"
 import fs from "fs"
+import { productModel } from "@/models/product.model"
 
 const uploadProductImage = async (
   productId:string,
@@ -18,7 +18,7 @@ const uploadProductImage = async (
   const productObjectId = new ObjectId(productId)
 
   // Cek apakah product ada atau tidak!
-  const product:Product|null = await getProductCollection().findOne({
+  const product:Product|null = await productModel().findOne({
     _id: productObjectId
   })
 
@@ -39,7 +39,7 @@ const uploadProductImage = async (
   })
 
   // Update field image and meta updatedAt
-  const result = await getProductCollection().updateOne({
+  const result = await productModel().updateOne({
     _id: productObjectId
   },{
     $set:{
@@ -54,7 +54,7 @@ const uploadProductImage = async (
   }
 
   // Kembalikan data produk baru
-  const updatedProduct = await getProductCollection().findOne({ _id: productObjectId });
+  const updatedProduct = await productModel().findOne({ _id: productObjectId });
   if (!updatedProduct) {
     throw new ResponseError(500, messages.product.errorProductNotFoundAfterUpdate);
   }
