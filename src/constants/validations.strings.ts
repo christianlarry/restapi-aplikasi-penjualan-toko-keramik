@@ -11,6 +11,7 @@ export const validationsStrings = {
     textureRequired: "Texture is required",
     brandRequired: "Brand is required",
     priceNonNegative: "Price must not be negative",
+    discountNonNegative: "Discount must not be negative",
     imageFileRequired: "Image file is required",
     invalidImageFile: "Only image files are allowed (.jpg, .jpeg, .png)"
   },

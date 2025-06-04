@@ -1,7 +1,7 @@
 import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
 import { Pagination } from "@/interfaces/pagination.interface"
-import { Product, ProductFilters, ProductFilterOptions, ProductOrderBy } from "@/interfaces/products.interface"
+import { Product, ProductFilters, ProductFilterOptions, ProductOrderBy, GetProductResponse } from "@/interfaces/products.interface"
 import {productModel} from "@/models/product.model"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { deleteFile } from "@/utils/deleteFile"
@@ -33,7 +33,8 @@ const getProductFilters = (filters: ProductFilters, searchQuery?: string): Filte
       { "specification.finishing": { $regex: searchQuery, $options: "i" } },
       { name: { $regex: searchQuery, $options: "i" } },
       { brand: { $regex: searchQuery, $options: "i" } },
-      { description: { $regex: searchQuery, $options: "i" } }
+      { description: { $regex: searchQuery, $options: "i" } },
+      { recommended: { $regex: searchQuery, $options: "i" } }
     ])
   }
 
@@ -43,6 +44,9 @@ const getProductFilters = (filters: ProductFilters, searchQuery?: string): Filte
     ...(filters.color && { "specification.color": { $in: filters.color } }),
     ...(filters.finishing && { "specification.finishing": { $in: filters.finishing } }),
     ...(filters.application && { "specification.application": { $in: filters.application } }),
+    ...(filters.discounted && {discount: {$gt: 0}}),
+    ...(filters.bestSeller && {isBestSeller: true}),
+    ...(filters.newArrivals && {isNewArrivals: true}),
     ...(orArr.length > 0 && {$or: orArr})
   }
 }
@@ -193,6 +197,9 @@ const create = async (body: PostProduct) => {
     },
     brand: product.brand,
     price: product.price,
+    ...(product.discount && {discount: product.discount}),
+    ...(product.isBestSeller && {isBestSeller: product.isBestSeller}),
+    ...(product.isNewArrivals && {isNewArrivals: product.isNewArrivals}),
     ...(product.recommended && { recommended: product.recommended }),
     createdAt: new Date(),
     updatedAt: new Date()
@@ -238,6 +245,9 @@ const update = async (id: string, body: PutProduct) => {
         },
         brand: product.brand,
         price: product.price,
+        ...(product.discount && {discount: product.discount}),
+        ...(product.isBestSeller && {isBestSeller: product.isBestSeller}),
+        ...(product.isNewArrivals && {isNewArrivals: product.isNewArrivals}),
         updatedAt: new Date()
       }
     }

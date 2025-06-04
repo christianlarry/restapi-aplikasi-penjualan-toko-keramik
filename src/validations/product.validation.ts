@@ -14,8 +14,11 @@ export const postProductValidation = z.object({
   texture: z.string().min(1, validationsStrings.product.textureRequired).transform(val=>capitalize(val)),
   brand: z.string().min(1, validationsStrings.product.brandRequired).transform(val=>capitalize(val)),
   price: z.number().nonnegative(validationsStrings.product.priceNonNegative),
+  discount: z.number().nonnegative(validationsStrings.product.discountNonNegative).min(0).max(100).optional(),
   isSlipResistant: z.boolean(),
   isWaterResistant: z.boolean(),
+  isBestSeller:z.boolean().optional(),
+  isNewArrivals:z.boolean().optional(),
   recommended: z.array(z.string().transform(val=>capitalize(val))).optional()
 })
 

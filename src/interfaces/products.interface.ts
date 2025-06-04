@@ -19,10 +19,17 @@ export interface Product{
   }
   brand: string,
   price: number,
+  discount?:number,
+  isBestSeller?:boolean,
+  isNewArrivals?:boolean,
   image?: string,
   recommended?: string[],
   createdAt: Date,
   updatedAt: Date
+}
+
+export interface GetProductResponse extends Product{
+  finalPrice:number
 }
 
 export interface ProductFilters{
@@ -34,7 +41,10 @@ export interface ProductFilters{
   size?:{
     width:number,
     height:number
-  }[]
+  }[],
+  discounted?:boolean,
+  bestSeller?:boolean,
+  newArrivals?:boolean
 }
 
 export type ProductOrderBy = "price_htl"|"price_lth"|"name_atz"

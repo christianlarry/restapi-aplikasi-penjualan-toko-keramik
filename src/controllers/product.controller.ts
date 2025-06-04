@@ -19,7 +19,10 @@ const getMany = async (req: Request, res: Response, next: NextFunction) => {
       color: parseQueryArray(req.query.color as FilterQuery),
       design: parseQueryArray(req.query.design as FilterQuery),
       application: parseQueryArray(req.query.type as FilterQuery),
-      size: parseQuerySizeToArray(req.query.size as FilterQuery)
+      size: parseQuerySizeToArray(req.query.size as FilterQuery),
+      bestSeller: req.query.bestSeller?.toString()=="true",
+      newArrivals: req.query.newArrivals?.toString()=="true",
+      discounted: req.query.discounted?.toString()=="true"
     };
 
     // SEARCH QUERY
