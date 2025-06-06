@@ -102,6 +102,13 @@ const orderedProduct = (orderBy:ProductOrderBy|undefined,findCursor:FindCursor<W
   }
 }
 
+const convertProductToResponseObj = (product:Product):GetProductResponse=>{
+  return {
+    ...product,
+    finalPrice: product.discount?product.price-(product.price*product.discount/100):product.price
+  }
+}
+
 const getMany = async (
   searchQuery: string | undefined, 
   filters: ProductFilters,
@@ -116,7 +123,7 @@ const getMany = async (
     findProductResult
   ).toArray()
 
-  return product
+  return product.map(item=>convertProductToResponseObj(item))
 }
 
 const getPaginated = async (
@@ -146,7 +153,7 @@ const getPaginated = async (
   }
 
   return {
-    product,
+    product: product.map(item=>convertProductToResponseObj(item)),
     pagination
   }
 }
@@ -163,7 +170,7 @@ const get = async (id: string) => {
 
   if (!product) throw new ResponseError(404, messages.product.notFound);
 
-  return product
+  return convertProductToResponseObj(product)
 }
 
 const getProductFilterOptions = async () => {
