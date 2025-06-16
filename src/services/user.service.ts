@@ -1,6 +1,7 @@
 import { db } from "@/application/database"
 import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
+import { ValidationError } from "@/errors/validation.error"
 import { User, UserJwtPayload } from "@/interfaces/user.interface"
 import { userModel } from "@/models/user.model"
 import { LoginUserRequest, loginUserValidation, RegisterUserRequest, registerUserValidation } from "@/validations/user.validation"
@@ -21,7 +22,7 @@ const register = async(body:RegisterUserRequest)=>{
 
   // Check apakah username sudah ada
   const isUserExist = await checkUserExist(creds.username)
-  if(isUserExist) throw new ResponseError(400,messages.user.usernameExist)
+  if(isUserExist) throw new ValidationError([{field: "username", message: messages.user.usernameExist}])
   
   // Hash password menggunakan bcrypt
   const hashedPassword = await bcrypt.hash(creds.password,10)
@@ -48,12 +49,12 @@ const login = async (body:LoginUserRequest)=>{
 
   // Cek user exists dan get user data
   const user = await userModel().findOne({username: creds.username})
-  if(!user) throw new ResponseError(400,messages.user.notFound)
+  if(!user) throw new ValidationError([{field:"username",message:messages.user.notFound}])
 
   // Cek apakah pass valid
   const isValidPassword = await bcrypt.compare(creds.password,user.password)
 
-  if(!isValidPassword) throw new ResponseError(400, messages.user.wrongPassword)
+  if(!isValidPassword) throw new ValidationError([{field:"password",message:messages.user.wrongPassword}])
   
   // Payload jwt
   const payload:UserJwtPayload = {

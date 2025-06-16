@@ -1,5 +1,6 @@
 import { messages } from "@/constants/messages.strings"
 import { ResponseError } from "@/errors/response.error"
+import { ValidationError } from "@/errors/validation.error"
 import { Pagination } from "@/interfaces/pagination.interface"
 import { Product, ProductFilters, ProductFilterOptions, ProductOrderBy, GetProductResponse } from "@/interfaces/products.interface"
 import {productModel} from "@/models/product.model"
@@ -184,7 +185,7 @@ const create = async (body: PostProduct) => {
 
   // CEK APAKAH NAMA SUDAH DIGUNAKAN
   const isNameTaken: boolean = await checkProductName(product.name)
-  if (isNameTaken) throw new ResponseError(400, messages.product.nameTaken)
+  if (isNameTaken) throw new ValidationError([{field:"name",message:messages.product.nameTaken}])
 
   const result = await productModel().insertOne({
     name: product.name,
