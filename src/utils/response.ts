@@ -1,3 +1,4 @@
+import { ValidationErrorItem } from "@/errors/validation.error"
 import { Pagination } from "@/interfaces/pagination.interface"
 import {Response} from "express"
 
@@ -18,7 +19,7 @@ const responseOk = (res:Response, status:number, data:any, page?:Pagination) => 
   }).end()
 }
 
-const responseErr = (res:Response, status:number, error:string) => {
+const responseErr = (res:Response, status:number, error:{message:string,errors?:ValidationErrorItem[]}) => {
   return res.status(status).json({
       error,
   }).end();
