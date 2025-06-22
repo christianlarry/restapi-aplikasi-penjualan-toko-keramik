@@ -206,8 +206,8 @@ const create = async (body: PostProduct) => {
     brand: product.brand,
     price: product.price,
     ...(product.discount && {discount: product.discount}),
-    ...(product.isBestSeller && {isBestSeller: product.isBestSeller}),
-    ...(product.isNewArrivals && {isNewArrivals: product.isNewArrivals}),
+    isBestSeller: product.isBestSeller || false,
+    isNewArrivals: product.isNewArrivals || false,
     ...(product.recommended && { recommended: product.recommended }),
     createdAt: new Date(),
     updatedAt: new Date()
@@ -254,8 +254,8 @@ const update = async (id: string, body: PutProduct) => {
         brand: product.brand,
         price: product.price,
         ...(product.discount && {discount: product.discount}),
-        ...(product.isBestSeller && {isBestSeller: product.isBestSeller}),
-        ...(product.isNewArrivals && {isNewArrivals: product.isNewArrivals}),
+        ...(typeof product.isBestSeller !== 'undefined' && {isBestSeller: product.isBestSeller}),
+        ...(typeof product.isNewArrivals !== 'undefined' && {isNewArrivals: product.isNewArrivals}),
         updatedAt: new Date()
       }
     }
