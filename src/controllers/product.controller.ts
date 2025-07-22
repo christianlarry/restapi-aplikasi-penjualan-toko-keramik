@@ -109,6 +109,18 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const updateProductFlags = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const productId = req.params.id;
+    const { isBestSeller, isNewArrivals } = req.body;
+
+    const result = await productService.updateProductFlags(productId, { isBestSeller, isNewArrivals });
+    responseOk(res, 200, result);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productId:string = req.params.id
@@ -128,5 +140,6 @@ export default {
   getProductFilterOptions,
   add,
   update,
+  updateProductFlags,
   remove,
 };

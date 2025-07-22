@@ -3,7 +3,7 @@ import { ResponseError } from "@/errors/response.error"
 import { ValidationError } from "@/errors/validation.error"
 import { Pagination } from "@/interfaces/pagination.interface"
 import { Product, ProductFilters, ProductFilterOptions, ProductOrderBy, GetProductResponse } from "@/interfaces/products.interface"
-import {productModel} from "@/models/product.model"
+import { productModel } from "@/models/product.model"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { deleteFile } from "@/utils/deleteFile"
 import { PostProduct, postProductValidation, PutProduct, putProductValidation } from "@/validations/product.validation"
@@ -26,7 +26,7 @@ const getProductFilters = (filters: ProductFilters, searchQuery?: string): Filte
     })))
   }
 
-  if(searchQuery){
+  if (searchQuery) {
     orArr = orArr.concat([
       { "specification.design": { $regex: searchQuery, $options: "i" } },
       { "specification.texture": { $regex: searchQuery, $options: "i" } },
@@ -45,10 +45,10 @@ const getProductFilters = (filters: ProductFilters, searchQuery?: string): Filte
     ...(filters.color && { "specification.color": { $in: filters.color } }),
     ...(filters.finishing && { "specification.finishing": { $in: filters.finishing } }),
     ...(filters.application && { "specification.application": { $in: filters.application } }),
-    ...(filters.discounted && {discount: {$gt: 0}}),
-    ...(filters.bestSeller && {isBestSeller: true}),
-    ...(filters.newArrivals && {isNewArrivals: true}),
-    ...(orArr.length > 0 && {$or: orArr})
+    ...(filters.discounted && { discount: { $gt: 0 } }),
+    ...(filters.bestSeller && { isBestSeller: true }),
+    ...(filters.newArrivals && { isNewArrivals: true }),
+    ...(orArr.length > 0 && { $or: orArr })
   }
 }
 
@@ -90,32 +90,32 @@ const updateFilterOptionsFromProduct = async () => {
   }
 }
 
-const orderedProduct = (orderBy:ProductOrderBy|undefined,findCursor:FindCursor<WithId<Product>>)=>{
-  switch(orderBy){
+const orderedProduct = (orderBy: ProductOrderBy | undefined, findCursor: FindCursor<WithId<Product>>) => {
+  switch (orderBy) {
     case "price_htl":
-      return findCursor.sort("price","desc")
+      return findCursor.sort("price", "desc")
     case "price_lth":
-      return findCursor.sort("price","asc")
+      return findCursor.sort("price", "asc")
     case "name_atz":
-      return findCursor.sort("name","desc")
+      return findCursor.sort("name", "desc")
     default:
       return findCursor
   }
 }
 
-const convertProductToResponseObj = (product:Product):GetProductResponse=>{
+const convertProductToResponseObj = (product: Product): GetProductResponse => {
   return {
     ...product,
-    finalPrice: product.discount?product.price-(product.price*product.discount/100):product.price
+    finalPrice: product.discount ? product.price - (product.price * product.discount / 100) : product.price
   }
 }
 
 const getMany = async (
-  searchQuery: string | undefined, 
+  searchQuery: string | undefined,
   filters: ProductFilters,
   orderBy?: ProductOrderBy
 ) => {
-  
+
   const findProductResult = await productModel().find(getProductFilters(filters, searchQuery))
 
   // Urutkan Product berdasarkan Parameter OrderBy Jika ada
@@ -124,15 +124,15 @@ const getMany = async (
     findProductResult
   ).toArray()
 
-  return product.map(item=>convertProductToResponseObj(item))
+  return product.map(item => convertProductToResponseObj(item))
 }
 
 const getPaginated = async (
-  page: number, 
-  size: number, 
-  searchQuery: string | undefined, 
+  page: number,
+  size: number,
+  searchQuery: string | undefined,
   filters: ProductFilters,
-  orderBy?:ProductOrderBy
+  orderBy?: ProductOrderBy
 ) => {
 
   const findProductResult = await productModel()
@@ -141,9 +141,9 @@ const getPaginated = async (
     .limit(size)
 
   // Urutkan Product berdasarkan Parameter OrderBy Jika ada
-  const product:Product[] = await orderedProduct(orderBy,findProductResult).toArray()
+  const product: Product[] = await orderedProduct(orderBy, findProductResult).toArray()
 
-  const total = (await productModel().find(getProductFilters(filters, searchQuery)).toArray()).length
+  const total = (await productModel().find().toArray()).length
   const totalPages = Math.ceil(total / size)
 
   const pagination: Pagination = {
@@ -154,7 +154,7 @@ const getPaginated = async (
   }
 
   return {
-    product: product.map(item=>convertProductToResponseObj(item)),
+    product: product.map(item => convertProductToResponseObj(item)),
     pagination
   }
 }
@@ -185,7 +185,7 @@ const create = async (body: PostProduct) => {
 
   // CEK APAKAH NAMA SUDAH DIGUNAKAN
   const isNameTaken: boolean = await checkProductName(product.name)
-  if (isNameTaken) throw new ValidationError([{field:"name",message:messages.product.nameTaken}])
+  if (isNameTaken) throw new ValidationError([{ field: "name", message: messages.product.nameTaken }])
 
   const result = await productModel().insertOne({
     name: product.name,
@@ -205,7 +205,7 @@ const create = async (body: PostProduct) => {
     },
     brand: product.brand,
     price: product.price,
-    ...(product.discount && {discount: product.discount}),
+    ...(product.discount && { discount: product.discount }),
     isBestSeller: product.isBestSeller || false,
     isNewArrivals: product.isNewArrivals || false,
     ...(product.recommended && { recommended: product.recommended }),
@@ -253,9 +253,9 @@ const update = async (id: string, body: PutProduct) => {
         },
         brand: product.brand,
         price: product.price,
-        ...(product.discount && {discount: product.discount}),
-        ...(typeof product.isBestSeller !== 'undefined' && {isBestSeller: product.isBestSeller}),
-        ...(typeof product.isNewArrivals !== 'undefined' && {isNewArrivals: product.isNewArrivals}),
+        ...(product.discount && { discount: product.discount }),
+        ...(typeof product.isBestSeller !== 'undefined' && { isBestSeller: product.isBestSeller }),
+        ...(typeof product.isNewArrivals !== 'undefined' && { isNewArrivals: product.isNewArrivals }),
         updatedAt: new Date()
       }
     }
@@ -269,6 +269,39 @@ const update = async (id: string, body: PutProduct) => {
   return {
     body
   }
+}
+
+const updateProductFlags = async (
+  productId: string,
+  flags: { isBestSeller?: boolean; isNewArrivals?: boolean }
+) => {
+  checkValidObjectId(productId, messages.product.invalidId);
+
+  // Hanya update field yang diberikan
+  const updateFields: any = {};
+  
+  if (typeof flags.isBestSeller !== "undefined") {
+    updateFields.isBestSeller = flags.isBestSeller;
+  }
+  if (typeof flags.isNewArrivals !== "undefined") {
+    updateFields.isNewArrivals = flags.isNewArrivals;
+  }
+
+  if (Object.keys(updateFields).length === 0) {
+    throw new ValidationError([
+      { field: "flags", message: "No valid flag fields provided" }
+    ]);
+  }
+
+  const result = await productModel().findOneAndUpdate(
+    { _id: new ObjectId(productId) },
+    { $set: updateFields },
+    { returnDocument: "after" }
+  );
+
+  if (!result) throw new ResponseError(404, messages.product.notFound);
+
+  return convertProductToResponseObj(result);
 }
 
 const remove = async (id: string) => {
@@ -295,5 +328,6 @@ export default {
   getProductFilterOptions,
   create,
   update,
+  updateProductFlags,
   remove
 }
