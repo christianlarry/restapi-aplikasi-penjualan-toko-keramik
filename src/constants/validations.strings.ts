@@ -12,6 +12,7 @@ export const validationsStrings = {
     brandRequired: "Brand is required",
     priceNonNegative: "Price must not be negative",
     discountNonNegative: "Discount must not be negative",
+    discountMustBeBetween0And100: "Discount must be between 0 and 100",
     imageFileRequired: "Image file is required",
     invalidImageFile: "Only image files are allowed (.jpg, .jpeg, .png)"
   },

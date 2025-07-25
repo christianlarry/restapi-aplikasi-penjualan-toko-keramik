@@ -1,4 +1,5 @@
 import { messages } from "@/constants/messages.strings"
+import { validationsStrings } from "@/constants/validations.strings"
 import { ResponseError } from "@/errors/response.error"
 import { ValidationError } from "@/errors/validation.error"
 import { Pagination } from "@/interfaces/pagination.interface"
@@ -215,9 +216,10 @@ const create = async (body: PostProduct) => {
 
   if (result.acknowledged) await updateFilterOptionsFromProduct()
 
+  const newProduct = await productModel().findOne({ _id: result.insertedId })
+
   return {
-    _id: result.insertedId,
-    ...product
+    ...newProduct
   }
 }
 
@@ -304,6 +306,24 @@ const updateProductFlags = async (
   return convertProductToResponseObj(result);
 }
 
+const updateProductDiscount = async (productId: string, discount: number) => {
+  checkValidObjectId(productId, messages.product.invalidId);
+
+  if (discount < 0 || discount > 100) {
+    throw new ValidationError([{ field: "discount", message: validationsStrings.product.discountMustBeBetween0And100 }]);
+  }
+
+  const result = await productModel().findOneAndUpdate(
+    { _id: new ObjectId(productId) },
+    { $set: { discount } },
+    { returnDocument: "after" }
+  );
+
+  if(!result) throw new ResponseError(404, messages.product.notFound);
+
+  return convertProductToResponseObj(result)
+}
+
 const remove = async (id: string) => {
   checkValidObjectId(id, messages.product.invalidId)
 
@@ -313,7 +333,7 @@ const remove = async (id: string) => {
 
   if (!result) throw new ResponseError(404, messages.product.notFound)
 
-  if (result.image) deleteFile(result.image)
+  if (result.image) deleteFile("public\\"+result.image)
 
   // Update isi dari Filter Options
   await updateFilterOptionsFromProduct()
@@ -329,5 +349,6 @@ export default {
   create,
   update,
   updateProductFlags,
+  updateProductDiscount,
   remove
 }
