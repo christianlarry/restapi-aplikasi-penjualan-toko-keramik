@@ -29,7 +29,7 @@ const getMany = async (req: Request, res: Response, next: NextFunction) => {
     const searchQuery: string | undefined = req.query.search?.toString();
 
     // ORDER BY Query
-    const orderBy:string | undefined = req.query.orderBy?.toString()
+    const orderBy:string | undefined = req.query.order_by?.toString()
 
     // IF NEED PAGINATION
     const { pagination_size, pagination_page } = req.query;
