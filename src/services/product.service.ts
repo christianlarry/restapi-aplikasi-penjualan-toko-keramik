@@ -59,6 +59,12 @@ const checkProductName = async (productName: string): Promise<boolean> => {
   return !!existing
 }
 
+const checkUpdatingProductName = async (productId: string, productName: string): Promise<boolean> => {
+  const existing = await productModel().findOne({ name: productName, _id: { $ne: new ObjectId(productId) } })
+
+  return !!existing
+}
+
 const updateFilterOptionsFromProduct = async () => {
   const designOptions = await productModel().distinct("specification.design")
   const applicationOptions = await productModel().distinct("specification.application")
@@ -228,12 +234,16 @@ const update = async (id: string, body: PutProduct) => {
 
   // Cek apakah id valid
   checkValidObjectId(id, messages.product.invalidId)
+  
+  // CEK APAKAH NAMA SUDAH DIGUNAKAN
+  const isNameTaken: boolean = await checkUpdatingProductName(id,product.name)
+  if (isNameTaken) throw new ValidationError([{ field: "name", message: messages.product.nameTaken }])
 
   // Cek apakah produk ada
   const isProductExist = await productModel().findOne({ _id: new ObjectId(id) })
   if (!isProductExist) throw new ResponseError(404, messages.product.notFound)
 
-  const result = await productModel().updateOne(
+  const result = await productModel().findOneAndUpdate(
     { _id: new ObjectId(id) },
     {
       $set: {
@@ -260,17 +270,18 @@ const update = async (id: string, body: PutProduct) => {
         ...(typeof product.isNewArrivals !== 'undefined' && { isNewArrivals: product.isNewArrivals }),
         updatedAt: new Date()
       }
+    },
+    {
+      returnDocument: "after"
     }
   )
 
-  if (result.modifiedCount <= 0) throw new ResponseError(500, messages.product.errorProductNotUpdated)
+  if (!result) throw new ResponseError(500, messages.product.errorProductNotUpdated)
 
   // Update isi dari Filter Options
   await updateFilterOptionsFromProduct()
 
-  return {
-    body
-  }
+  return convertProductToResponseObj(result)
 }
 
 const updateProductFlags = async (
