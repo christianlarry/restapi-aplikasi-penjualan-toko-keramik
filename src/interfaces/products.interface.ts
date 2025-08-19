@@ -20,6 +20,7 @@ export interface Product{
   brand: string,
   price: number,
   discount?:number,
+  tilesPerBox:number,
   isBestSeller?:boolean,
   isNewArrivals?:boolean,
   image?: string,
