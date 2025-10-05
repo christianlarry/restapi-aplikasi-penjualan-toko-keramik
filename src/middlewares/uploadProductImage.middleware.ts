@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
 
 const fileFilter = (_req:Request, file:Express.Multer.File, cb:FileFilterCallback) => {
   const ext = path.extname(file.originalname).toLowerCase();
-  if (!['.jpg', '.jpeg', '.png'].includes(ext)) {
+  if (!['.jpg', '.jpeg', '.png', ".webp"].includes(ext)) {
     return cb(new ResponseError(400,validationsStrings.product.invalidImageFile));
   }
   cb(null, true);

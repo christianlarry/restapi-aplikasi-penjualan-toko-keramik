@@ -12,7 +12,7 @@ const uploadProductImage = async (
   productId:string,
   file:Express.Multer.File
 )=>{
-  // Cek apakah valid Project Id
+  // Cek apakah valid product Id
   checkValidObjectId(productId,messages.product.invalidId)
 
   const productObjectId = new ObjectId(productId)
