@@ -10,7 +10,7 @@
       "@controllers/*": ["src/controllers/*"],
       "@routes/*": ["src/routes/*"],
       "@services/*": ["src/services/*"],
-      "@middlewares/*": ["src/middleares/*"]
+      "@middlewares/*": ["src/middlewares/*"]
     },
     "outDir": "./dist",                        /* Allow 'import x from y' when a module doesn't have a default export. */
     "esModuleInterop": true,                               /* Disable resolving symlinks to their realpath. This correlates to the same flag in node. */
