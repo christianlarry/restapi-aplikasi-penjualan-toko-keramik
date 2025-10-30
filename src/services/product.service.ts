@@ -150,7 +150,7 @@ const getPaginated = async (
   // Urutkan Product berdasarkan Parameter OrderBy Jika ada
   const product: Product[] = await orderedProduct(orderBy, findProductResult).toArray()
 
-  const total = (await productModel().find().toArray()).length
+  const total = await productModel().countDocuments(getProductFilters(filters, searchQuery))
   const totalPages = Math.ceil(total / size)
 
   const pagination: Pagination = {
