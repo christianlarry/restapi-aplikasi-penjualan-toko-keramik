@@ -25,5 +25,7 @@ export const postProductValidation = z.object({
 
 export const putProductValidation = postProductValidation
 
+export const promptValidation = z.string().min(1, validationsStrings.product.promptRequired)
+
 export type PostProduct = z.infer<typeof postProductValidation>
 export type PutProduct = z.infer<typeof putProductValidation>

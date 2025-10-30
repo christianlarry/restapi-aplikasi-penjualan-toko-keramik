@@ -7,10 +7,15 @@ import { Product, ProductFilters, ProductFilterOptions, ProductOrderBy, GetProdu
 import { productModel } from "@/models/product.model"
 import { checkValidObjectId } from "@/utils/checkValidObjectId"
 import { deleteFile } from "@/utils/deleteFile"
-import { PostProduct, postProductValidation, PutProduct, putProductValidation } from "@/validations/product.validation"
+import { PostProduct, postProductValidation, promptValidation, PutProduct, putProductValidation } from "@/validations/product.validation"
 import { validate } from "@/validations/validation"
 import { db } from "@application/database"
 import { Filter, FindCursor, ObjectId, WithId } from "mongodb"
+
+import embeddingService from "@/services/embedding.service"
+import { pineconeIndex } from "@/application/pinecone"
+import { application } from "express"
+import { genAI } from "@/application/gemini"
 
 export const getProductFilterOptionsCollection = () => {
   return db.collection<ProductFilterOptions>("product_filter_options")
@@ -167,7 +172,6 @@ const getPaginated = async (
 }
 
 const get = async (id: string) => {
-
   // Cek valid object id
   checkValidObjectId(id, messages.product.invalidId)
 
@@ -354,6 +358,90 @@ const remove = async (id: string) => {
   return result
 }
 
+const generateProductEmbeddings = async ()=>{
+  const products = await productModel().find().toArray()
+
+  for(const product of products){
+    const text = `${product.name}. ${product.description ?? ""}. Desain: ${product.specification.design}. Tekstur: ${product.specification.texture}. Warna: ${product.specification.color.join(", ")}. Finishing: ${product.specification.finishing}. Aplikasi: ${product.specification.application.join(", ")}. Merek: ${product.brand}. Harga: ${product.price}. Ukuran: ${product.specification.size.width}x${product.specification.size.height}. Cocok Untuk: ${product.recommended?.join(", ") ?? ""}`
+
+    const embeddings = await embeddingService.getEmbeddingFromText(text)
+    
+    await pineconeIndex.upsert([
+      {
+        id: product._id.toString(),
+        values: embeddings,
+        metadata: {
+          name: product.name,
+          description: product.description ?? "",
+          size: product.specification.size.width + "x" + product.specification.size.height,
+          application: product.specification.application.join(", "),
+          color: product.specification.color.join(", "),
+          design: product.specification.design,
+          texture: product.specification.texture,
+          finishing: product.specification.finishing,
+          brand: product.brand,
+          price: product.price,
+        }
+      }
+    ])
+
+  }
+
+  console.log("✅ Product embeddings uploaded to Pinecone!");
+}
+
+const getProductRecommendationsByAI = async (prompt:string)=>{
+
+  validate(promptValidation,prompt)
+
+  const promptVector = await embeddingService.getEmbeddingFromText(prompt)
+  const results = await pineconeIndex.query({
+    vector: promptVector,
+    topK: 5,
+    includeMetadata: true,
+  })
+
+  const context = results.matches
+    .map(match =>
+        `id: ${match.id}` +
+        `Nama: ${match.metadata?.name}. ` +
+        `Deskripsi: ${match.metadata?.description}. ` +
+        `Ukuran: ${match.metadata?.size}. ` + 
+        `Aplikasi: ${match.metadata?.application}. ` +
+        `Warna: ${match.metadata?.color}. ` +
+        `Desain: ${match.metadata?.design}. ` +
+        `Tekstur: ${match.metadata?.texture}. ` +
+        `Finishing: ${match.metadata?.finishing}. ` +
+        `Brand: ${match.metadata?.brand}. ` +
+        `Harga: ${match.metadata?.price}.`
+    )
+    .join('\n');
+
+  const promptText = `Kamu adalah asisten toko keramik online. Berdasarkan deskripsi berikut: "${prompt}" dan produk yang tersedia: 
+  ${context} 
+  Berikan rekomendasi yang paling cocok, jelaskan alasan pemilihannya.
+  Jika deskripsi yang diberikan kosong atau tidak jelas, jelaskan kalau prompt tidak jelas.`
+
+  // AI Generate Response
+  const response = await genAI.models.generateContent({
+    model: "gemini-2.5-flash-lite",
+    contents: promptText
+  })
+  const aiResponseText = response.text
+  
+  // Dapatkan Product Dari database untuk Suggestions
+  const productIds = await results.matches.map(match => new ObjectId(match.id))
+
+  const suggestions = await productModel().find({
+    _id: {$in: productIds}
+  }).toArray()
+
+  return {
+    message: aiResponseText,
+    suggestions
+  }
+}
+
 export default {
   get,
   getPaginated,
@@ -363,5 +451,7 @@ export default {
   update,
   updateProductFlags,
   updateProductDiscount,
-  remove
+  remove,
+  generateProductEmbeddings,
+  getProductRecommendationsByAI
 }

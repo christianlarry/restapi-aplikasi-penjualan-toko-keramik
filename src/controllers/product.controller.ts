@@ -146,6 +146,17 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const recommendProducts = async (req:Request,res:Response,next:NextFunction)=>{
+  try {
+    const {prompt} = req.body
+    const result = await productService.getProductRecommendationsByAI(prompt)
+
+    responseOk(res,200,result)
+  } catch (err) {
+    next(err)
+  }
+}
+
 export default {
   getMany,
   get,
@@ -155,4 +166,5 @@ export default {
   updateProductFlags,
   updateProductDiscount,
   remove,
+  recommendProducts
 };

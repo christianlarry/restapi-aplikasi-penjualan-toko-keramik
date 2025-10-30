@@ -9,3 +9,13 @@ export const apiRateLimiter = rateLimit({
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
+
+export const apiGenAIRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 5 menit
+  max: 10, // maksimal 100 request per windowMs per IP
+  message: {
+    message: "Too many requests, please try again later.",
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});

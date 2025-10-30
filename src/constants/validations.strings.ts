@@ -15,7 +15,8 @@ export const validationsStrings = {
     discountNonNegative: "Discount must not be negative",
     discountMustBeBetween0And100: "Discount must be between 0 and 100",
     imageFileRequired: "Image file is required",
-    invalidImageFile: "Only image files are allowed (.jpg, .jpeg, .png, .webp)"
+    invalidImageFile: "Only image files are allowed (.jpg, .jpeg, .png, .webp)",
+    promptRequired: "Prompt is required"
   },
   user:{
     firstNameRequired: "First name is required",
