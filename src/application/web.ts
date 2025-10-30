@@ -17,7 +17,7 @@ web.use(express.urlencoded({extended: true})) // Parse URL-encoded bodies
 web.use(express.static("public")) // Serve static files from the "public" directory
 web.use(cors()) // Enable CORS for all origins
 web.use(morgan("common")) // Logging Middleware
-web.use(apiRateLimiter) // Rate Limiter Middleware
+// web.use(apiRateLimiter) // Rate Limiter Middleware
 
 // Routes
 // ------ Some routes here -------

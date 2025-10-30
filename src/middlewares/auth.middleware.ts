@@ -20,21 +20,23 @@ export const authenticateToken = async (req:Request, _res:Response, next:NextFun
     // MENGATASI TOKEN YANG SUDAH DIANGGAP KADALUARSA (SEPERTI TOKEN UNTUK USER YANG SUDAH LOGOUT)
     // const [invalidToken] = await getInvalidAccessTokenByToken(token)
     // if (invalidToken.length != 0 || invalidToken.length === 1) return res.sendStatus(403)
-  
-    jwt.verify(token, JWT_SECRET, async (err,decoded)=>{
-      if (err) throw new ResponseError(403,"Forbidden")
+    
+    const decoded = await jwt.verify(token, JWT_SECRET)
 
-      const isUserExist = await checkUserExist((decoded as UserJwtPayload).username)
-      if (!isUserExist) {
-        throw new ResponseError(403, "Forbidden")
-      }
+    const isUserExist = await checkUserExist((decoded as UserJwtPayload).username)
+    if (!isUserExist) {
+      throw new ResponseError(403, "Forbidden")
+    }
     
-      (req as WithUserRequest).user = decoded as UserJwtPayload
-    
-      next()
-    })
+    (req as WithUserRequest).user = decoded as UserJwtPayload
+
+    next()
 
   } catch (err) {
-    next(err)
+    if(err instanceof jwt.JsonWebTokenError || err instanceof jwt.TokenExpiredError || err instanceof jwt.NotBeforeError){
+      next(new ResponseError(403,"Forbidden"))
+    }else{
+      next(err)
+    }
   }
 }
