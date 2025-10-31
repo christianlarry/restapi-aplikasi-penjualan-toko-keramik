@@ -48,7 +48,7 @@ export interface ProductFilters{
   newArrivals?:boolean
 }
 
-export type ProductOrderBy = "price_htl"|"price_lth"|"name_atz"
+export type ProductOrderBy = "price_asc"|"price_desc"|"name_asc"|"name_desc"
 
 interface FilterOption{
   label:string,

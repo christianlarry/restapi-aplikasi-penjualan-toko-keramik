@@ -44,13 +44,16 @@ export const getProductFilters = (filters: ProductFilters, searchQuery?: string)
 };
 
 export const getSortStage = (orderBy: ProductOrderBy | undefined) => {
+
   switch (orderBy) {
-    case "price_htl":
-      return { $sort: { finalPrice: -1 } };
-    case "price_lth":
+    case "price_asc":
       return { $sort: { finalPrice: 1 } };
-    case "name_atz":
-      return { $sort: { name: 1 } }; // A-Z is ascending
+    case "price_desc":
+      return { $sort: { finalPrice: -1 } };
+    case "name_asc":
+      return { $sort: { name: 1 } };
+    case "name_desc":
+      return { $sort: { name: -1 } };
     default:
       return { $sort: { createdAt: -1 } };
   }
