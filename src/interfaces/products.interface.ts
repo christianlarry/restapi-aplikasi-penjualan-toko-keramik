@@ -45,7 +45,12 @@ export interface ProductFilters{
   }[],
   discounted?:boolean,
   bestSeller?:boolean,
-  newArrivals?:boolean
+  newArrivals?:boolean,
+  price?:{
+    min?:number,
+    max?:number
+  },
+  recommended?:string[]
 }
 
 export type ProductOrderBy = "price_asc"|"price_desc"|"name_asc"|"name_desc"

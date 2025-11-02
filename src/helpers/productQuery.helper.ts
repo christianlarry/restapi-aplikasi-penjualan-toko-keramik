@@ -34,6 +34,8 @@ export const getProductFilters = (filters: ProductFilters, searchQuery?: string)
     ...(filters.discounted && { discount: { $gt: 0 } }),
     ...(filters.bestSeller && { isBestSeller: true }),
     ...(filters.newArrivals && { isNewArrivals: true }),
+    ...(filters.price && { price: { $gte: filters.price.min ?? 0, $lte: filters.price.max ?? 999999999999 } }),
+    ...(filters.recommended && { recommended: { $in: filters.recommended } })
   };
 
   if (orArr.length > 0) {

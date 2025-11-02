@@ -253,6 +253,12 @@ const getProductRecommendationsByAI = async (prompt: string) => {
   return recommendationService.getRecommendations(prompt);
 };
 
+const getDistinctValues = async (field: keyof Product | "specification.design" | "specification.texture" | "specification.finishing" | "specification.color" | "specification.application" | "specification.size")=>{
+  const distinctFields = await productModel().distinct(field)
+
+  return distinctFields
+}
+
 export default {
   get,
   getPaginated,
@@ -263,5 +269,6 @@ export default {
   updateProductFlags,
   updateProductDiscount,
   remove,
-  getProductRecommendationsByAI
+  getProductRecommendationsByAI,
+  getDistinctValues
 };

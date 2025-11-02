@@ -1,3 +1,4 @@
+import { logger } from "@/application/logging"
 import { ResponseError } from "@/errors/response.error"
 import { ValidationError } from "@/errors/validation.error"
 import { responseErr } from "@/utils/response"
@@ -8,6 +9,8 @@ export const errorMiddleware = (err:Error, req:Request, res:Response, next:NextF
     next()
     return
   }
+
+  logger.error(err.stack)
 
   if (err instanceof ValidationError) {
     // Pastikan format response konsisten

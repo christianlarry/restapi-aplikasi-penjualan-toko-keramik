@@ -38,7 +38,7 @@ const getRecommendations = async (prompt: string) => {
     )
     .join('\n\n');
 
-  const promptText = `Anda adalah seorang asisten ahli di toko keramik. Berdasarkan permintaan pelanggan: "${prompt}" dan data produk berikut:\n\n${context}\n\nBerikan rekomendasi produk yang paling sesuai dalam format naratif yang jelas dan sebutkan alasan mengapa produk tersebut cocok. Jika permintaan tidak jelas, berikan saran umum.`;
+  const promptText = `Anda adalah seorang asisten ahli di toko keramik. Berdasarkan permintaan pelanggan: "${prompt}" dan data produk yang tersedia:\n\n${context}\n\nBerikan rekomendasi produk yang paling sesuai dalam format naratif yang jelas dan sebutkan alasan mengapa produk tersebut cocok. Jika permintaan tidak jelas, berikan saran umum. Respon ini untuk pelanggan, respon lah seolah-olah anda asisten toko yang sedang membantu pelanggan di toko, gunakan bahasa yang santai tapi sopan`;
 
   const response = await genAI.models.generateContent({
     model: "gemini-2.5-flash-lite",

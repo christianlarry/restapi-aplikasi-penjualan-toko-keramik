@@ -9,6 +9,7 @@ import { responseOk } from "@/utils/response";
 import { ProductFilters, ProductOrderBy } from "@/interfaces/products.interface";
 import { PostProduct, PutProduct } from "@/validations/product.validation";
 import { FilterQuery, parseQueryArray, parseQuerySizeToArray } from "@/utils/queryFormatter";
+import geminiService from "@/services/gemini.service";
 
 const getMany = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -149,7 +150,7 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
 const recommendProducts = async (req:Request,res:Response,next:NextFunction)=>{
   try {
     const {prompt} = req.body
-    const result = await productService.getProductRecommendationsByAI(prompt)
+    const result = await geminiService.getProductRecommendations(prompt)
 
     responseOk(res,200,result)
   } catch (err) {
