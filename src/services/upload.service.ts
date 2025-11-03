@@ -7,6 +7,7 @@ import { deleteFile } from "@/utils/deleteFile"
 import path from "path"
 import fs from "fs"
 import { productModel } from "@/models/product.model"
+import sharp from "sharp"
 
 const uploadProductImage = async (
   productId:string,
@@ -30,13 +31,21 @@ const uploadProductImage = async (
   // Ganti nama file
   const dateNow = new Date()
 
-  const oldPath = file.path
-  const newFileName = `${product.name.split(" ").join("-")}-${dateNow.getTime()}${path.extname(file.filename)}`.toLowerCase()
+  const newFileName = `${product.name.split(" ").join("-")}-${dateNow.getTime()}.webp`.toLowerCase()
   const newPath = path.join(file.destination,newFileName)
 
-  fs.rename(oldPath,newPath,(err)=>{
-    if(err) throw new ResponseError(500, messages.product.errorFailedRenameUploadedImage)
-  })
+  try {
+    
+    await sharp(file.path)
+      .resize(800,800, {fit: "cover"})
+      .webp({quality: 80})
+      .toFile(newPath)
+
+    fs.unlinkSync(file.path)
+
+  } catch (err) {
+    throw new ResponseError(500, "Failed to process image")
+  }
 
   // Update field image and meta updatedAt
   const result = await productModel().updateOne({

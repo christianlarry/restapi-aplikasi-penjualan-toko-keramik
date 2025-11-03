@@ -1,5 +1,5 @@
 import { genAI, genAIModel } from "@/application/gemini";
-import { Chat, ContentListUnion, FunctionDeclaration, GenerateContentConfig, Type } from "@google/genai";
+import { ContentListUnion, FunctionDeclaration, GenerateContentConfig, Type } from "@google/genai";
 import productService from "./product.service";
 import { logger } from "@/application/logging";
 import { GetProductResponse } from "@/interfaces/products.interface";
@@ -86,8 +86,9 @@ const productRecommendationsTool = (enumValues: EnumValues): FunctionDeclaration
 const SYSTEM_INSTRUCTION = `Kamu adalah asisten virtual dari toko "CV Aneka Keramik". Gaya bicaramu santai, fun, dan sopan. Tugasmu adalah memberikan rekomendasi produk keramik.
 - JIKA user menyebutkan ciri-ciri produk (seperti warna, ukuran, desain, tekstur, harga, atau area penggunaan), SELALU panggil fungsi 'getProductRecommendations' untuk mencari data.
 - JIKA user memberikan prompt yang terlalu umum atau tidak jelas (misal: "cariin keramik dong"), kasih respon (contoh: "Maaf ya! Sepertinya kita belum bisa kasih rekomendasi nih. Coba deh jelaskan kebutuhanmu dengan cara lain"), minta user untuk menjelaskan dengan detail yang lebih spesifik tentang keramik yang dicari.
+- JIKA user tanya "Ada keramik apa saja?" jawab, silahkan cek langsung di katalog kami. kamu hanya bisa berikan rekomendasi sesuai kebutuhan saja.
 - JIKA kamu menerima hasil fungsi dengan status 'QUERY_TOO_BROAD', artinya permintaan user terlalu umum. Katakan bahwa permintaan terlalu umum. Minta user jelaskan dengan detail spesifik.
-- Setelah menerima daftar produk dari sistem, jelaskan produk tersebut kepada pelanggan dengan gaya bahasamu. Berikan alasan mengapa produk itu cocok. Cari produk yang paling relevan saja dan berikan penjelasan, produk yang tidak terlalu relevan jadikan honorable mention saja.
+- Setelah menerima daftar produk dari sistem, jelaskan produk tersebut kepada pelanggan dengan gaya bahasamu. Berikan alasan mengapa produk itu cocok. Cari produk yang paling relevan saja dan berikan penjelasan, produk yang tidak terlalu relevan jadikan list honorable mention saja.
 - JANGAN PERNAH menanyakan pertanyaan balik seperti "apakah mau mencari yang lain?". Cukup berikan jawaban final berdasarkan data yang kamu terima.
 - "Desain modern dan material premium" contoh prompt seperti ini tidak akan dikenali argsnya, tapi kamu tetap bisa mengatur argsnya. "Desain modern dan material premium" bisa jadi yang teksturnya slightly textured, bisa jadi kombinasi warna putih dan finishing matte itu modern dan premium. setiap deskripsi prompt pasti ada kombinasi contoh "Saya butuh produk untuk kamar anak". cari kombinasinya dan masukkan ke args.
 - Berikan kombinasi ukuran jika permintaan tidak spesifik contoh ("Ukurannya besar")`;
@@ -137,7 +138,7 @@ const getProductRecommendations = async (prompt: string) => {
     config,
   })
 
-  let products:GetProductResponse[] = []
+  let products:GetProductResponse[]|null = null
 
   while (response.functionCalls && response.functionCalls.length > 0) {
 
@@ -159,7 +160,7 @@ const getProductRecommendations = async (prompt: string) => {
 
         return {
           message: "Maaf ya! Sepertinya kita belum bisa kasih rekomendasi nih. Coba deh jelaskan kebutuhanmu dengan cara lain, mungkin aku bisa bantu carikan alternatif terbaik dari CV Aneka Keramik!",
-          products
+          products: []
         }
       }
 
@@ -191,7 +192,7 @@ const getProductRecommendations = async (prompt: string) => {
           size: functionArgs?.size as { width: number, height: number }[],
           recommended: functionArgs?.recommendedFor as string[],
           price: functionArgs?.price as { min: number|undefined, max: number|undefined } | undefined
-        })
+        }, undefined, 10)
 
         if (products.length === 0) {
           return {

@@ -68,11 +68,12 @@ const convertProductToResponseObj = (product: Product): GetProductResponse => {
 
 // --- CORE SERVICE FUNCTIONS ---
 
-const getMany = async (searchQuery: string | undefined, filters: ProductFilters, orderBy?: ProductOrderBy) => {
+const getMany = async (searchQuery: string | undefined, filters: ProductFilters, orderBy?: ProductOrderBy, limit?: number) => {
   const pipeline: any[] = [
     { $match: getProductFilters(filters, searchQuery) },
     { $addFields: { finalPrice: { $subtract: ["$price", { $divide: [{ $multiply: ["$price", { $ifNull: ["$discount", 0] }] }, 100] }] } } },
-    getSortStage(orderBy)
+    getSortStage(orderBy),
+    limit ? { $limit: limit } : {}
   ];
 
   const products = await productModel().aggregate(pipeline).toArray();
@@ -149,7 +150,7 @@ const create = async (body: PostProduct) => {
 
   if (newProduct) {
     await updateFilterOptionsFromProduct();
-    await productVectorService.upsert(newProduct);
+    // await productVectorService.upsert(newProduct);
   }
 
   return newProduct;
@@ -195,7 +196,7 @@ const update = async (id: string, body: PutProduct) => {
   if (!result) throw new ResponseError(404, messages.product.notFound);
 
   await updateFilterOptionsFromProduct();
-  await productVectorService.update(result);
+  // await productVectorService.update(result);
 
   return convertProductToResponseObj(result);
 };
@@ -244,7 +245,7 @@ const remove = async (id: string) => {
 
   if (result.image) deleteFile("public\\" + result.image);
   await updateFilterOptionsFromProduct();
-  await productVectorService.remove(id);
+  // await productVectorService.remove(id);
 
   return result;
 };
