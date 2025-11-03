@@ -30,18 +30,16 @@ const uploadProductImage = async (
 
   // Ganti nama file
   const dateNow = new Date()
-
-  const newFileName = `${product.name.split(" ").join("-")}-${dateNow.getTime()}.webp`.toLowerCase()
-  const newPath = path.join(file.destination,newFileName)
+  const fileName = `${product.name.split(" ").join("-")}-${dateNow.getTime()}.webp`.toLowerCase()
+  const fileDestination = "public//uploads/images/products"
+  const filePath = path.join(fileDestination,fileName)
 
   try {
     
-    await sharp(file.path)
+    await sharp(file.buffer)
       .resize(800,800, {fit: "cover"})
       .webp({quality: 80})
-      .toFile(newPath)
-
-    fs.unlinkSync(file.path)
+      .toFile(filePath)
 
   } catch (err) {
     throw new ResponseError(500, "Failed to process image")
@@ -52,7 +50,7 @@ const uploadProductImage = async (
     _id: productObjectId
   },{
     $set:{
-      image: newPath.replace(`public\\`,""),
+      image: filePath.replace(`public\\`,""),
       updatedAt: dateNow
     }
   })

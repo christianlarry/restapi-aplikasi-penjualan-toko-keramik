@@ -8,10 +8,12 @@ import { validationsStrings } from '@/constants/validations.strings';
 const uploadDir = 'public/uploads/images/products';
 fs.mkdirSync(uploadDir, { recursive: true });
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
-});
+// const storage = multer.diskStorage({
+//   destination: (_req, _file, cb) => cb(null, uploadDir),
+//   filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
+// });
+
+const storage = multer.memoryStorage()
 
 const fileFilter = (_req:Request, file:Express.Multer.File, cb:FileFilterCallback) => {
   const ext = path.extname(file.originalname).toLowerCase();
